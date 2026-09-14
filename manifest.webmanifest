@@ -1,0 +1,10 @@
+{
+  "name":"Joy's World",
+  "short_name":"Joy",
+  "description":"Private Banking × Fashion House × Digital Luxury Palace",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#170d11",
+  "theme_color":"#190d12",
+  "icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
