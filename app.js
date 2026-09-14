@@ -7,10 +7,28 @@ const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 let attendantBusy=false;
 let actionCount=0;
 
-function showRoom(id){
+const portal=document.getElementById('room-portal');
+const portalName=document.getElementById('portal-name');
+const roomNames={salon:'The Private Salon',wardrobe:'Joy’s Wardrobe',money:'The Money Room'};
+let roomMoving=false;
+async function showRoom(id){
+  if(roomMoving||document.getElementById(id)?.classList.contains('active'))return;
+  roomMoving=true;
+  if(!reduceMotion){
+    portalName.textContent=roomNames[id]||'Welcome, Madam';
+    portal.classList.add('entering');
+    await new Promise(resolve=>setTimeout(resolve,650));
+  }
   rooms.forEach(room=>room.classList.toggle('active',room.id===id));
   document.querySelectorAll('.dock [data-room]').forEach(button=>button.classList.toggle('active',button.dataset.room===id));
-  scrollTo({top:0,behavior:reduceMotion?'auto':'smooth'});
+  scrollTo({top:0,behavior:'auto'});
+  if(!reduceMotion){
+    portal.classList.add('opening');
+    await new Promise(resolve=>setTimeout(resolve,900));
+    portal.className='room-portal';
+    if(id!=='salon')summonAttendant('room');
+  }
+  roomMoving=false;
 }
 nav.forEach(button=>button.addEventListener('click',()=>showRoom(button.dataset.room)));
 
@@ -40,6 +58,21 @@ function summonAttendant(action){
     attendantBusy=false;
   },3500);
 }
+const lookFigure=document.getElementById('look-figure');
+const lookName=document.getElementById('look-name');
+const lookNames={bordeaux:'The Bordeaux Evening',ivory:'The Ivory Sunday',emerald:'The Emerald Arrival'};
+document.querySelectorAll('.look').forEach(button=>button.addEventListener('click',()=>{
+  document.querySelectorAll('.look').forEach(item=>item.classList.remove('active'));
+  button.classList.add('active');
+  lookFigure.className='look-figure '+button.dataset.look;
+  lookName.textContent=lookNames[button.dataset.look];
+}));
+document.querySelector('.save-look')?.addEventListener('click',()=>{
+  localStorage.setItem('joySavedLook',lookName.textContent);
+  summonAttendant('service');
+  notify('Added to Joy’s private edit.');
+});
+
 document.querySelectorAll('.js-attendant').forEach(button=>button.addEventListener('click',()=>summonAttendant(button.dataset.action)));
 
 const status=document.getElementById('sven-status');
