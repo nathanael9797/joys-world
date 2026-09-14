@@ -1,15 +1,44 @@
 const estateEntrance=document.getElementById('estate-entrance');
 const estateGate=document.getElementById('estate-gate');
+const houseJazz=document.getElementById('house-jazz');
+const ambienceToggle=document.getElementById('ambience-toggle');
 let enteringEstate=false;
 
 const doorLatch=new Audio('./assets/door-latch.wav');
 doorLatch.preload='auto';
+doorLatch.volume=.82;
+let ambienceMuted=localStorage.getItem('joyAmbienceMuted')==='true';
+let ambienceFadeFrame=0;
+let ambienceWasPlaying=false;
+
+function setAmbienceControl(){
+  ambienceToggle.classList.toggle('muted',ambienceMuted);
+  ambienceToggle.setAttribute('aria-pressed',String(ambienceMuted));
+  ambienceToggle.setAttribute('aria-label',ambienceMuted?'Play house ambience':'Mute house ambience');
+}
+function primeAmbience(){
+  if(ambienceMuted||!houseJazz.paused)return;
+  houseJazz.volume=0;
+  houseJazz.play().catch(()=>{});
+}
+function fadeAmbience(target,duration=2600){
+  cancelAnimationFrame(ambienceFadeFrame);
+  const start=performance.now();
+  const initial=houseJazz.volume;
+  const step=now=>{
+    const progress=Math.min(1,(now-start)/duration);
+    const eased=progress*progress*(3-2*progress);
+    houseJazz.volume=initial+(target-initial)*eased;
+    if(progress<1)ambienceFadeFrame=requestAnimationFrame(step);
+    else if(target===0)houseJazz.pause();
+  };
+  ambienceFadeFrame=requestAnimationFrame(step);
+}
 
 function playDoorClick(){
   try{
     doorLatch.pause();
     doorLatch.currentTime=0;
-    doorLatch.volume=1;
     doorLatch.play().catch(()=>{});
   }catch(error){}
 }
@@ -17,15 +46,37 @@ function enterEstate(){
   if(enteringEstate)return;
   enteringEstate=true;
   playDoorClick();
+  primeAmbience();
   if(reduceMotion){
-    estateEntrance.classList.add('gone');
-    setTimeout(()=>estateEntrance.remove(),350);
+    setTimeout(()=>estateEntrance.classList.add('gone'),420);
+    setTimeout(()=>estateEntrance.remove(),760);
+    setTimeout(()=>{if(!ambienceMuted)fadeAmbience(.065)},720);
     return;
   }
-  setTimeout(()=>estateEntrance.classList.add('door-open'),120);
-  setTimeout(()=>estateEntrance.remove(),720);
+  setTimeout(()=>estateEntrance.classList.add('door-open'),430);
+  setTimeout(()=>estateEntrance.remove(),930);
+  setTimeout(()=>{if(!ambienceMuted)fadeAmbience(.065)},780);
 }
-estateGate?.addEventListener('click',enterEstate);
+estateGate?.addEventListener('click',enterEstate,{once:true});
+
+ambienceToggle?.addEventListener('click',()=>{
+  ambienceMuted=!ambienceMuted;
+  localStorage.setItem('joyAmbienceMuted',String(ambienceMuted));
+  setAmbienceControl();
+  if(ambienceMuted)fadeAmbience(0,420);
+  else{primeAmbience();fadeAmbience(.065,1200)}
+});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    ambienceWasPlaying=!houseJazz.paused;
+    cancelAnimationFrame(ambienceFadeFrame);
+    houseJazz.pause();
+  }else if(ambienceWasPlaying&&!ambienceMuted){
+    houseJazz.volume=0;
+    houseJazz.play().then(()=>fadeAmbience(.065,1200)).catch(()=>{});
+  }
+});
+setAmbienceControl();
 
 const rooms=[...document.querySelectorAll('.room')];
 const nav=[...document.querySelectorAll('[data-room]')];
