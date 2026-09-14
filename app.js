@@ -1,3 +1,49 @@
+const estateEntrance=document.getElementById('estate-entrance');
+const estateGate=document.getElementById('estate-gate');
+let enteringEstate=false;
+
+function playDoorClick(){
+  try{
+    const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    const audio=new AudioCtx();
+    const now=audio.currentTime;
+    const gain=audio.createGain();
+    gain.gain.setValueAtTime(.0001,now);
+    gain.gain.exponentialRampToValueAtTime(.18,now+.008);
+    gain.gain.exponentialRampToValueAtTime(.0001,now+.16);
+    gain.connect(audio.destination);
+    const knock=audio.createOscillator();
+    knock.type='triangle';
+    knock.frequency.setValueAtTime(150,now);
+    knock.frequency.exponentialRampToValueAtTime(72,now+.12);
+    knock.connect(gain);knock.start(now);knock.stop(now+.17);
+    const size=Math.floor(audio.sampleRate*.09);
+    const buffer=audio.createBuffer(1,size,audio.sampleRate);
+    const data=buffer.getChannelData(0);
+    for(let i=0;i<size;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/size,5);
+    const noise=audio.createBufferSource();
+    const noiseGain=audio.createGain();
+    noiseGain.gain.value=.11;noise.buffer=buffer;noise.connect(noiseGain);noiseGain.connect(audio.destination);
+    noise.start(now+.035);
+    setTimeout(()=>audio.close(),450);
+  }catch(error){}
+}
+function enterEstate(){
+  if(enteringEstate)return;
+  enteringEstate=true;
+  if(reduceMotion){
+    playDoorClick();
+    estateEntrance.classList.add('gone');
+    setTimeout(()=>estateEntrance.remove(),350);
+    return;
+  }
+  estateEntrance.classList.add('approaching');
+  setTimeout(playDoorClick,1780);
+  setTimeout(()=>estateEntrance.classList.add('door-open'),1950);
+  setTimeout(()=>estateEntrance.remove(),2750);
+}
+estateGate?.addEventListener('click',enterEstate);
+
 const rooms=[...document.querySelectorAll('.room')];
 const nav=[...document.querySelectorAll('[data-room]')];
 const toast=document.getElementById('toast');
