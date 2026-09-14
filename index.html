@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="preload" as="image" href="assets/joy-estate.jpg">
-  <link rel="stylesheet" href="styles.css?v=17">
+  <link rel="stylesheet" href="styles.css?v=18">
   <title>Joy's World</title>
 </head>
 <body>
@@ -71,11 +71,12 @@
           </div>
           <div class="joy-model" id="joy-model" data-top="silk" data-bottom="trousers" data-shoes="heels" data-bag="mini" data-jewelry="hoops">
             <img class="joy-portrait" src="assets/joy-portrait.webp" alt="Illustrated portrait of Joy">
-            <div class="model-hair"><i class="hair-part"></i></div>
-            <div class="model-head"><i class="brow left"></i><i class="brow right"></i><i class="eye left"></i><i class="eye right"></i><i class="nose"></i><i class="lips"></i></div>
-            <div class="model-necklace"></div>
-            <div class="model-top"></div><div class="model-arms"></div><div class="model-bottom"></div>
-            <div class="model-shoes"></div><div class="model-bag"></div><div class="model-earrings"></div>
+            <div class="model-top" aria-hidden="true"></div>
+            <div class="model-arms" aria-hidden="true"></div>
+            <div class="model-bottom" aria-hidden="true"></div>
+            <div class="model-shoes" aria-hidden="true"></div>
+            <div class="model-jewelry" aria-hidden="true"></div>
+            <div class="model-bag" aria-hidden="true"></div>
           </div>
           <div class="look-summary">
             <small>JOY’S CURRENT EDIT</small>
@@ -206,6 +207,6 @@
   </div>
 
   <div class="toast" id="toast" role="status"></div>
-  <script src="app.js?v=17"></script>
+  <script src="app.js?v=18"></script>
 </body>
 </html>
