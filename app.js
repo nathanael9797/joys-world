@@ -62,6 +62,23 @@ const outcomes=[
  ['BUY','Demo setup meets the simulated conditions.'],
  ['SELL','Demo risk balance favors defensive positioning.']
 ];
+let activeStrategy='Balanced';
+let demoBalance=10000;
+let sessionReturn=0;
+const balanceEl=document.getElementById('demo-balance');
+const returnEl=document.getElementById('demo-return');
+const ticketStrategy=document.getElementById('ticket-strategy');
+const ticketSize=document.getElementById('ticket-size');
+const ticketConfidence=document.getElementById('ticket-confidence');
+
+document.querySelectorAll('.strategy').forEach(button=>button.addEventListener('click',()=>{
+  document.querySelectorAll('.strategy').forEach(item=>item.classList.remove('active'));
+  button.classList.add('active');
+  activeStrategy=button.dataset.strategy;
+  notify(activeStrategy+' demo strategy selected.');
+}));
+
+function money(value){return new Intl.NumberFormat('en-IE',{style:'currency',currency:'EUR'}).format(value)}
 const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
 wake.addEventListener('click',async()=>{
@@ -81,6 +98,18 @@ wake.addEventListener('click',async()=>{
   market.classList.add('decision-ready');
   decisionValue.textContent=result;
   decisionNote.textContent=note;
+  const confidence=Math.floor(62+Math.random()*27);
+  const demoSize=result==='HOLD'?0:Math.round((demoBalance*(activeStrategy==='Defensive'?.004:activeStrategy==='Opportunistic'?.01:.007))/10)*10;
+  const movement=result==='HOLD'?0:(Math.random()-.42)*demoSize*.035;
+  sessionReturn+=movement;
+  demoBalance=10000+sessionReturn;
+  balanceEl.textContent=money(demoBalance);
+  returnEl.textContent=(sessionReturn>=0?'+ ':'− ')+money(Math.abs(sessionReturn));
+  returnEl.classList.toggle('positive',sessionReturn>0);
+  returnEl.classList.toggle('negative',sessionReturn<0);
+  ticketStrategy.textContent=activeStrategy.toUpperCase();
+  ticketSize.textContent=money(demoSize);
+  ticketConfidence.textContent=confidence+'%';
   decision.hidden=false;
   wake.querySelector('span').textContent='RUN AGAIN';
   wake.disabled=false;
