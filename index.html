@@ -35,10 +35,35 @@
         <button class="text-action js-attendant" data-action="note">OPEN TODAY’S NOTE <span>→</span></button>
       </div>
       <div class="quick-grid">
-        <button class="quick js-attendant" data-action="wardrobe"><span>01</span><b>Wardrobe</b><small>Curate the day</small></button>
+        <button class="quick" data-room="wardrobe"><span>01</span><b>Wardrobe</b><small>Curate the day</small></button>
         <button class="quick js-attendant" data-action="calendar"><span>02</span><b>Engagements</b><small>Hold the room</small></button>
         <button class="quick" data-room="money"><span>03</span><b>Money Machine</b><small>Wake Sven</small></button>
         <button class="quick js-attendant" data-action="vault"><span>04</span><b>Private Vault</b><small>Protected</small></button>
+      </div>
+    </section>
+
+
+    <section class="room wardrobe-room" id="wardrobe" aria-labelledby="wardrobe-title">
+      <div class="wardrobe-shell">
+        <p class="eyebrow">THE DRESSING ROOM</p>
+        <h2 id="wardrobe-title">Joy’s Wardrobe</h2>
+        <p class="lede">A private edit of silhouettes, colour and mood — chosen entirely for you.</p>
+        <div class="wardrobe-scene">
+          <div class="mirror">
+            <div class="mirror-glow"></div>
+            <div class="look-figure" id="look-figure" aria-hidden="true">
+              <i class="look-head"></i><i class="look-body"></i><i class="look-skirt"></i>
+            </div>
+            <p id="look-name">The Bordeaux Evening</p>
+          </div>
+          <div class="rail" aria-hidden="true"><span></span><i></i><i></i><i></i></div>
+        </div>
+        <div class="look-selector" role="group" aria-label="Select a wardrobe look">
+          <button class="look active" data-look="bordeaux"><i></i><span><b>Bordeaux Evening</b><small>Confident · sculptural</small></span></button>
+          <button class="look" data-look="ivory"><i></i><span><b>Ivory Sunday</b><small>Soft · luminous</small></span></button>
+          <button class="look" data-look="emerald"><i></i><span><b>Emerald Arrival</b><small>Regal · composed</small></span></button>
+        </div>
+        <button class="wake-button save-look"><span>SAVE THIS LOOK</span><small>TO JOY’S EDIT</small></button>
       </div>
     </section>
 
@@ -112,9 +137,15 @@
 
   <nav class="dock" aria-label="Rooms">
     <button class="active" data-room="salon"><span>⌂</span>Salon</button>
+    <button data-room="wardrobe"><span>♧</span>Wardrobe</button>
     <button data-room="money"><span>⌁</span>Money</button>
     <button class="js-attendant" data-action="concierge"><span>♢</span>Concierge</button>
   </nav>
+
+  <div class="room-portal" id="room-portal" aria-hidden="true">
+    <div class="portal-door left"></div><div class="portal-door right"></div>
+    <div class="portal-title"><small>THE PRIVATE RESIDENCE</small><strong id="portal-name">Welcome, Madam</strong></div>
+  </div>
 
   <div class="attendant-layer" id="attendant-layer" aria-live="polite" aria-hidden="true">
     <p id="attendant-line">Right away, Madam.</p>
