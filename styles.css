@@ -140,6 +140,34 @@
 @media(min-width:760px){.atelier-preview{min-height:565px}.joy-model{transform:scale(1.12);transform-origin:top center}}
 @media(prefers-reduced-motion:reduce){.couture-fit{animation:none}}
 
+/* Anatomical Joy base v21 — approved portrait remains a separate locked asset */
+.atelier-preview{min-height:610px}
+.joy-model{position:relative;width:190px;height:438px;margin:10px auto 0;transform:none;filter:drop-shadow(0 21px 25px rgba(0,0,0,.28))}
+.joy-body{position:absolute;z-index:1;inset:0;width:190px;height:425px;object-fit:fill;pointer-events:none}
+.joy-head-lock{position:absolute;z-index:3;left:36px;top:-2px;width:118px;height:126px;overflow:hidden;pointer-events:none;mask-image:radial-gradient(ellipse 48% 49% at 50% 43%,#000 58%,rgba(0,0,0,.94) 72%,transparent 100%)}
+.joy-portrait{position:absolute;left:-7px;top:-12px;width:132px;height:158px;object-fit:cover;object-position:center 20%;border:0;border-radius:0;clip-path:none;filter:none;pointer-events:none}
+.model-top{z-index:5;left:55px;top:117px;width:81px;height:96px;clip-path:polygon(12% 5%,34% 0,49% 9%,67% 0,89% 5%,100% 24%,91% 100%,10% 100%,0 24%);border-radius:0;background:linear-gradient(105deg,var(--fabric-a),var(--fabric-b) 55%,var(--fabric-a));box-shadow:inset 0 1px var(--stitch),inset 8px 0 13px rgba(255,255,255,.035),inset -9px 0 14px rgba(0,0,0,.2)}
+.model-top:before{left:20px;top:2px;width:41px;height:22px}.model-top:after{left:40px;top:31px;height:58px}
+.model-arms{z-index:6;left:0;top:117px;width:190px;height:165px;border:0;background:none}
+.model-arms:before{left:20px;top:7px;width:48px;height:121px;transform:none;transform-origin:center;clip-path:polygon(67% 0,100% 11%,72% 42%,43% 72%,73% 88%,64% 100%,20% 85%,0 65%,25% 38%);border-radius:45% 35% 40% 48%;background:linear-gradient(125deg,var(--fabric-a),var(--fabric-b) 58%,var(--fabric-a));box-shadow:inset 2px 1px var(--stitch)}
+.model-arms:after{right:30px;top:5px;width:27px;height:145px;transform:rotate(-2deg);transform-origin:top center;clip-path:polygon(4% 0,93% 2%,100% 91%,72% 100%,22% 95%,0 8%);border-radius:44% 48% 39% 42%;background:linear-gradient(100deg,var(--fabric-a),var(--fabric-b));box-shadow:inset 2px 1px var(--stitch),inset -5px 0 8px rgba(0,0,0,.18)}
+.model-bottom{z-index:4;left:53px;top:204px;width:88px;height:190px;background:linear-gradient(100deg,#151415,#393338 49%,#141314);clip-path:polygon(5% 0,96% 0,89% 100%,59% 100%,54% 35%,47% 100%,17% 100%);box-shadow:inset 10px 0 15px rgba(255,255,255,.025),inset -10px 0 15px rgba(0,0,0,.25)}
+.model-bottom:before{left:5px;right:4px;top:2px}
+.model-shoes{z-index:7;left:48px;top:397px;width:101px;height:29px}
+.model-shoes:before,.model-shoes:after{bottom:2px;width:37px;height:18px;border-bottom-width:3px;border-radius:70% 12% 22% 32%}
+.model-shoes:before{left:0;transform:rotate(-3deg)}.model-shoes:after{right:0;transform:scaleX(-1) rotate(8deg)}
+.model-jewelry:before,.model-jewelry:after{top:82px}.model-jewelry:before{left:54px}.model-jewelry:after{right:54px}
+.model-bag{right:-2px;top:252px;width:47px;height:51px}
+.joy-model[data-bottom=midi] .model-bottom{height:151px;clip-path:polygon(7% 0,93% 0,100% 100%,0 100%)}
+.joy-model[data-bottom=wrap] .model-bottom{height:170px;clip-path:polygon(5% 0,95% 0,88% 100%,12% 100%)}
+.joy-model[data-bottom=wrap] .model-bottom:after{height:162px}
+.joy-model[data-bottom=column] .model-bottom{height:191px;clip-path:polygon(8% 0,92% 0,83% 100%,20% 100%)}
+.joy-model[data-shoes=loafer] .model-shoes:before,.joy-model[data-shoes=loafer] .model-shoes:after{height:15px}
+.joy-model[data-bag=crossbody] .model-bag{right:-1px;top:273px}
+.joy-model[data-bag=crossbody] .model-bag:before{left:-107px;top:-163px;width:138px;height:188px;transform:rotate(-18deg)}
+.joy-model[data-bag=clutch] .model-bag{right:0;top:278px}
+@media(min-width:760px){.atelier-preview{min-height:675px}.joy-model{transform:scale(1.12);transform-origin:top center}}
+
 /* Entrance atmosphere v19 */
 .topbar .sound-button{margin-left:auto;font:17px Georgia;color:var(--gold);transition:opacity .25s,border-color .25s}
 .topbar .sound-button+.icon-button{margin-left:0}
