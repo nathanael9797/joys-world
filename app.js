@@ -2,59 +2,59 @@ const estateEntrance=document.getElementById('estate-entrance');
 const estateGate=document.getElementById('estate-gate');
 let enteringEstate=false;
 
-function playDoorClick(delay=.58){
+function playDoorClick(delay=.5){
   try{
     const AudioCtx=window.AudioContext||window.webkitAudioContext;
     if(!AudioCtx)return;
     const audio=new AudioCtx();
     audio.resume?.();
     const when=audio.currentTime+delay;
-    const output=audio.createGain();
-    output.gain.setValueAtTime(.0001,audio.currentTime);
-    output.gain.setValueAtTime(.0001,when);
-    output.gain.exponentialRampToValueAtTime(.72,when+.006);
-    output.gain.exponentialRampToValueAtTime(.0001,when+.24);
-    output.connect(audio.destination);
 
-    const thunk=audio.createOscillator();
-    thunk.type='triangle';
-    thunk.frequency.setValueAtTime(210,when);
-    thunk.frequency.exponentialRampToValueAtTime(62,when+.14);
-    thunk.connect(output);
-    thunk.start(when);
-    thunk.stop(when+.16);
+    function noiseHit(start,duration,volume,filterType,frequency){
+      const size=Math.max(1,Math.floor(audio.sampleRate*duration));
+      const buffer=audio.createBuffer(1,size,audio.sampleRate);
+      const data=buffer.getChannelData(0);
+      for(let i=0;i<size;i++){
+        const envelope=Math.pow(1-i/size,5);
+        data[i]=(Math.random()*2-1)*envelope;
+      }
+      const source=audio.createBufferSource();
+      const filter=audio.createBiquadFilter();
+      const gain=audio.createGain();
+      source.buffer=buffer;
+      filter.type=filterType;
+      filter.frequency.value=frequency;
+      filter.Q.value=1.2;
+      gain.gain.setValueAtTime(volume,start);
+      gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
+      source.connect(filter);
+      filter.connect(gain);
+      gain.connect(audio.destination);
+      source.start(start);
+    }
 
-    [760,1280].forEach((frequency,index)=>{
-      const click=audio.createOscillator();
-      const clickGain=audio.createGain();
-      const start=when+index*.065;
-      click.type='square';
-      click.frequency.setValueAtTime(frequency,start);
-      click.frequency.exponentialRampToValueAtTime(frequency*.58,start+.07);
-      clickGain.gain.setValueAtTime(.0001,start);
-      clickGain.gain.exponentialRampToValueAtTime(index?.25:.34,start+.003);
-      clickGain.gain.exponentialRampToValueAtTime(.0001,start+.095);
-      click.connect(clickGain);
-      clickGain.connect(audio.destination);
-      click.start(start);
-      click.stop(start+.1);
-    });
+    // Small metal latch retracts.
+    noiseHit(when,.045,.48,'highpass',1400);
+    noiseHit(when+.052,.035,.34,'bandpass',2300);
 
-    const size=Math.floor(audio.sampleRate*.12);
-    const buffer=audio.createBuffer(1,size,audio.sampleRate);
-    const data=buffer.getChannelData(0);
-    for(let i=0;i<size;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/size,7);
-    [when+.012,when+.09].forEach((start,index)=>{
-      const noise=audio.createBufferSource();
-      const noiseGain=audio.createGain();
-      noise.buffer=buffer;
-      noiseGain.gain.setValueAtTime(index?.2:.28,start);
-      noiseGain.gain.exponentialRampToValueAtTime(.0001,start+.085);
-      noise.connect(noiseGain);
-      noiseGain.connect(audio.destination);
-      noise.start(start);
-    });
-    setTimeout(()=>audio.close(),1400);
+    // Heavy lock tongue lands, followed by the wooden door settling.
+    noiseHit(when+.105,.075,.62,'lowpass',520);
+    noiseHit(when+.145,.16,.38,'lowpass',210);
+
+    const body=audio.createOscillator();
+    const bodyGain=audio.createGain();
+    body.type='sine';
+    body.frequency.setValueAtTime(92,when+.11);
+    body.frequency.exponentialRampToValueAtTime(58,when+.25);
+    bodyGain.gain.setValueAtTime(.0001,when+.1);
+    bodyGain.gain.exponentialRampToValueAtTime(.22,when+.115);
+    bodyGain.gain.exponentialRampToValueAtTime(.0001,when+.29);
+    body.connect(bodyGain);
+    bodyGain.connect(audio.destination);
+    body.start(when+.1);
+    body.stop(when+.3);
+
+    setTimeout(()=>audio.close(),1300);
   }catch(error){}
 }
 function enterEstate(){
