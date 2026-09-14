@@ -133,13 +133,24 @@ const composerSummary=document.getElementById('composer-summary');
 let activeCategory='top';
 
 function piece(category,id){return wardrobe[category].find(item=>item.id===id)}
+const garmentLayer={top:['.model-top','.model-arms'],bottom:['.model-bottom'],shoes:['.model-shoes'],bag:['.model-bag'],jewelry:['.model-jewelry']};
+function fitGarment(category){
+  const layers=garmentLayer[category]||[];
+  layers.forEach(selector=>{
+    const layer=model.querySelector(selector);
+    if(!layer)return;
+    layer.classList.remove('couture-fit');
+    void layer.offsetWidth;
+    layer.classList.add('couture-fit');
+  });
+}
 function renderOptions(){
-  options.innerHTML=wardrobe[activeCategory].map(item=>`<button class="piece ${selections[activeCategory]===item.id?'active':''}" data-piece="${item.id}"><i style="--swatch:${item.tone}"></i><span><b>${item.name}</b><small>${item.note}</small></span><em>${selections[activeCategory]===item.id?'SELECTED':'ADD'}</em></button>`).join('');
+  options.innerHTML=wardrobe[activeCategory].map(item=>`<button class="piece ${selections[activeCategory]===item.id?'active':''}" data-piece="${item.id}"><i class="piece-thumb ${activeCategory}-${item.id}" style="--swatch:${item.tone}"></i><span><b>${item.name}</b><small>${item.note}</small></span><em>${selections[activeCategory]===item.id?'SELECTED':'ADD'}</em></button>`).join('');
   options.querySelectorAll('.piece').forEach(button=>button.addEventListener('click',()=>{
     occasionTitle='Joy’s Personal Mix';
     selections[activeCategory]=button.dataset.piece;
     model.dataset[activeCategory]=button.dataset.piece;
-    renderOptions(); updateComposer();
+    fitGarment(activeCategory); renderOptions(); updateComposer();
   }));
 }
 function updateComposer(){
@@ -147,7 +158,6 @@ function updateComposer(){
   const names=[top.name,bottom.name,piece('bag',selections.bag).name,piece('jewelry',selections.jewelry).name];
   composerTitle.textContent=occasionTitle;
   composerSummary.textContent=names.join(' · ');
-  model.classList.remove('styled'); void model.offsetWidth; model.classList.add('styled');
 }
 const occasionSelect=document.getElementById('occasion');
 function applyOccasion(name,announce=true){
@@ -156,6 +166,7 @@ function applyOccasion(name,announce=true){
   Object.keys(selections).forEach(category=>{
     selections[category]=edit[category];
     model.dataset[category]=edit[category];
+    if(announce)fitGarment(category);
   });
   renderOptions();updateComposer();
   if(announce)notify(name+' edit composed for Joy.');
@@ -172,6 +183,7 @@ document.getElementById('random-look').addEventListener('click',()=>{
   Object.keys(wardrobe).forEach(category=>{
     const items=wardrobe[category]; selections[category]=items[Math.floor(Math.random()*items.length)].id;
     model.dataset[category]=selections[category];
+    fitGarment(category);
   });
   renderOptions();updateComposer();notify('A new edit, composed for Joy.');
 });
