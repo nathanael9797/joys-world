@@ -52,6 +52,16 @@
           <span class="demo-badge">DEMO MODE</span>
         </div>
         <p class="simulated">SIMULATED CAPITAL · NO REAL ORDERS</p>
+        <div class="quant-overview">
+          <div><small>DEMO BALANCE</small><strong id="demo-balance">€10,000.00</strong></div>
+          <div><small>SESSION</small><strong id="demo-return">± €0.00</strong></div>
+          <div><small>RISK LIMIT</small><strong>1.0%</strong></div>
+        </div>
+        <div class="strategy-strip" role="group" aria-label="Demo strategy">
+          <button class="strategy active" data-strategy="Balanced">BALANCED</button>
+          <button class="strategy" data-strategy="Defensive">DEFENSIVE</button>
+          <button class="strategy" data-strategy="Opportunistic">OPPORTUNISTIC</button>
+        </div>
         <div class="market-screen" id="market-screen" aria-live="polite">
           <div class="screen-grid" aria-hidden="true"></div>
           <svg class="chart" viewBox="0 0 500 180" role="img" aria-label="Decorative simulated market chart">
@@ -89,6 +99,11 @@
           <p>DEMO DECISION</p>
           <strong id="decision-value">HOLD</strong>
           <span id="decision-note">Risk remains within the simulated guardrail.</span>
+          <div class="ticket">
+            <span>STRATEGY <b id="ticket-strategy">BALANCED</b></span>
+            <span>DEMO SIZE <b id="ticket-size">€0</b></span>
+            <span>CONFIDENCE <b id="ticket-confidence">—</b></span>
+          </div>
         </div>
         <button class="wake-button" id="wake-sven"><span>WAKE SVEN</span><small>RUN DEMO ANALYSIS</small></button>
       </div>
