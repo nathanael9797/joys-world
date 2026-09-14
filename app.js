@@ -53,8 +53,8 @@ function enterEstate(){
     return;
   }
   estateEntrance.classList.add('approaching');
-  setTimeout(()=>estateEntrance.classList.add('door-open'),790);
-  setTimeout(()=>estateEntrance.remove(),1350);
+  setTimeout(()=>estateEntrance.classList.add('door-open'),930);
+  setTimeout(()=>estateEntrance.remove(),1480);
 }
 estateGate?.addEventListener('click',enterEstate);
 
