@@ -7,11 +7,24 @@
   <meta name="description" content="Joy's private digital luxury palace and simulated money room.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="preload" as="image" href="assets/joy-estate.jpg">
+  <link rel="stylesheet" href="styles.css?v=9">
   <title>Joy's World</title>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
+  <div class="estate-entrance" id="estate-entrance">
+    <button class="estate-gate" id="estate-gate" aria-label="Enter Joy's World">
+      <img src="assets/joy-estate.jpg" alt="Joy’s elegant white estate at dusk">
+      <span class="estate-vignette"></span>
+      <span class="estate-copy">
+        <small>A PRIVATE WORLD, MADE FOR YOU</small>
+        <strong>JOY</strong>
+        <em>Touch to enter</em>
+      </span>
+      <span class="estate-seal" aria-hidden="true">J</span>
+    </button>
+  </div>
   <header class="topbar">
     <div class="crest" aria-hidden="true">J</div>
     <div>
@@ -192,6 +205,6 @@
   </div>
 
   <div class="toast" id="toast" role="status"></div>
-  <script src="app.js?v=7"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>
