@@ -2,45 +2,73 @@ const estateEntrance=document.getElementById('estate-entrance');
 const estateGate=document.getElementById('estate-gate');
 let enteringEstate=false;
 
-function playDoorClick(){
+function playDoorClick(delay=.58){
   try{
     const AudioCtx=window.AudioContext||window.webkitAudioContext;
+    if(!AudioCtx)return;
     const audio=new AudioCtx();
-    const now=audio.currentTime;
-    const gain=audio.createGain();
-    gain.gain.setValueAtTime(.0001,now);
-    gain.gain.exponentialRampToValueAtTime(.18,now+.008);
-    gain.gain.exponentialRampToValueAtTime(.0001,now+.16);
-    gain.connect(audio.destination);
-    const knock=audio.createOscillator();
-    knock.type='triangle';
-    knock.frequency.setValueAtTime(150,now);
-    knock.frequency.exponentialRampToValueAtTime(72,now+.12);
-    knock.connect(gain);knock.start(now);knock.stop(now+.17);
-    const size=Math.floor(audio.sampleRate*.09);
+    audio.resume?.();
+    const when=audio.currentTime+delay;
+    const output=audio.createGain();
+    output.gain.setValueAtTime(.0001,audio.currentTime);
+    output.gain.setValueAtTime(.0001,when);
+    output.gain.exponentialRampToValueAtTime(.72,when+.006);
+    output.gain.exponentialRampToValueAtTime(.0001,when+.24);
+    output.connect(audio.destination);
+
+    const thunk=audio.createOscillator();
+    thunk.type='triangle';
+    thunk.frequency.setValueAtTime(210,when);
+    thunk.frequency.exponentialRampToValueAtTime(62,when+.14);
+    thunk.connect(output);
+    thunk.start(when);
+    thunk.stop(when+.16);
+
+    [760,1280].forEach((frequency,index)=>{
+      const click=audio.createOscillator();
+      const clickGain=audio.createGain();
+      const start=when+index*.065;
+      click.type='square';
+      click.frequency.setValueAtTime(frequency,start);
+      click.frequency.exponentialRampToValueAtTime(frequency*.58,start+.07);
+      clickGain.gain.setValueAtTime(.0001,start);
+      clickGain.gain.exponentialRampToValueAtTime(index?.25:.34,start+.003);
+      clickGain.gain.exponentialRampToValueAtTime(.0001,start+.095);
+      click.connect(clickGain);
+      clickGain.connect(audio.destination);
+      click.start(start);
+      click.stop(start+.1);
+    });
+
+    const size=Math.floor(audio.sampleRate*.12);
     const buffer=audio.createBuffer(1,size,audio.sampleRate);
     const data=buffer.getChannelData(0);
-    for(let i=0;i<size;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/size,5);
-    const noise=audio.createBufferSource();
-    const noiseGain=audio.createGain();
-    noiseGain.gain.value=.11;noise.buffer=buffer;noise.connect(noiseGain);noiseGain.connect(audio.destination);
-    noise.start(now+.035);
-    setTimeout(()=>audio.close(),450);
+    for(let i=0;i<size;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/size,7);
+    [when+.012,when+.09].forEach((start,index)=>{
+      const noise=audio.createBufferSource();
+      const noiseGain=audio.createGain();
+      noise.buffer=buffer;
+      noiseGain.gain.setValueAtTime(index?.2:.28,start);
+      noiseGain.gain.exponentialRampToValueAtTime(.0001,start+.085);
+      noise.connect(noiseGain);
+      noiseGain.connect(audio.destination);
+      noise.start(start);
+    });
+    setTimeout(()=>audio.close(),1400);
   }catch(error){}
 }
 function enterEstate(){
   if(enteringEstate)return;
   enteringEstate=true;
+  playDoorClick(reduceMotion?0:.58);
   if(reduceMotion){
-    playDoorClick();
     estateEntrance.classList.add('gone');
     setTimeout(()=>estateEntrance.remove(),350);
     return;
   }
   estateEntrance.classList.add('approaching');
-  setTimeout(playDoorClick,1780);
-  setTimeout(()=>estateEntrance.classList.add('door-open'),1950);
-  setTimeout(()=>estateEntrance.remove(),2750);
+  setTimeout(()=>estateEntrance.classList.add('door-open'),790);
+  setTimeout(()=>estateEntrance.remove(),1350);
 }
 estateGate?.addEventListener('click',enterEstate);
 
