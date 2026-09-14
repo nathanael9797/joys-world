@@ -88,6 +88,14 @@ const wardrobe={
   ]
 };
 const selections={top:'silk',bottom:'trousers',shoes:'heels',bag:'mini',jewelry:'hoops'};
+const occasionLooks={
+  'Date night':{title:'Midnight Joy',top:'black',bottom:'column',shoes:'heels',bag:'clutch',jewelry:'hoops'},
+  'Sunday elegance':{title:'Ivory Sunday',top:'ivory',bottom:'midi',shoes:'sandal',bag:'mini',jewelry:'drops'},
+  'City day':{title:'City Poise',top:'silk',bottom:'trousers',shoes:'loafer',bag:'crossbody',jewelry:'minimal'},
+  'Celebration':{title:'Rust & Radiance',top:'rust',bottom:'wrap',shoes:'heels',bag:'clutch',jewelry:'drops'},
+  'Power meeting':{title:'Quiet Authority',top:'ivory',bottom:'trousers',shoes:'loafer',bag:'mini',jewelry:'minimal'}
+};
+let occasionTitle=occasionLooks['Date night'].title;
 const categoryLabels={top:'Top',bottom:'Bottom',shoes:'Shoes',bag:'Bag',jewelry:'Jewels'};
 const model=document.getElementById('joy-model');
 const options=document.getElementById('wardrobe-options');
@@ -99,6 +107,7 @@ function piece(category,id){return wardrobe[category].find(item=>item.id===id)}
 function renderOptions(){
   options.innerHTML=wardrobe[activeCategory].map(item=>`<button class="piece ${selections[activeCategory]===item.id?'active':''}" data-piece="${item.id}"><i style="--swatch:${item.tone}"></i><span><b>${item.name}</b><small>${item.note}</small></span><em>${selections[activeCategory]===item.id?'SELECTED':'ADD'}</em></button>`).join('');
   options.querySelectorAll('.piece').forEach(button=>button.addEventListener('click',()=>{
+    occasionTitle='Joy’s Personal Mix';
     selections[activeCategory]=button.dataset.piece;
     model.dataset[activeCategory]=button.dataset.piece;
     renderOptions(); updateComposer();
@@ -107,15 +116,30 @@ function renderOptions(){
 function updateComposer(){
   const top=piece('top',selections.top), bottom=piece('bottom',selections.bottom), shoes=piece('shoes',selections.shoes);
   const names=[top.name,bottom.name,piece('bag',selections.bag).name,piece('jewelry',selections.jewelry).name];
-  composerTitle.textContent=selections.top==='rust'?'Rust & Radiance':selections.top==='black'?'Midnight Joy':selections.top==='ivory'?'Ivory Confidence':'Espresso & Gold';
+  composerTitle.textContent=occasionTitle;
   composerSummary.textContent=names.join(' · ');
   model.classList.remove('styled'); void model.offsetWidth; model.classList.add('styled');
 }
+const occasionSelect=document.getElementById('occasion');
+function applyOccasion(name,announce=true){
+  const edit=occasionLooks[name];
+  occasionTitle=edit.title;
+  Object.keys(selections).forEach(category=>{
+    selections[category]=edit[category];
+    model.dataset[category]=edit[category];
+  });
+  renderOptions();updateComposer();
+  if(announce)notify(name+' edit composed for Joy.');
+}
+occasionSelect.addEventListener('change',()=>applyOccasion(occasionSelect.value));
+applyOccasion(occasionSelect.value,false);
+
 document.querySelectorAll('.category').forEach(button=>button.addEventListener('click',()=>{
   document.querySelectorAll('.category').forEach(item=>item.classList.remove('active'));
   button.classList.add('active'); activeCategory=button.dataset.category; renderOptions();
 }));
 document.getElementById('random-look').addEventListener('click',()=>{
+  occasionTitle='Joy’s Personal Mix';
   Object.keys(wardrobe).forEach(category=>{
     const items=wardrobe[category]; selections[category]=items[Math.floor(Math.random()*items.length)].id;
     model.dataset[category]=selections[category];
