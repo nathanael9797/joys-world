@@ -58,20 +58,86 @@ function summonAttendant(action){
     attendantBusy=false;
   },3500);
 }
-const lookFigure=document.getElementById('look-figure');
-const lookName=document.getElementById('look-name');
-const lookNames={bordeaux:'The Bordeaux Evening',ivory:'The Ivory Sunday',emerald:'The Emerald Arrival'};
-document.querySelectorAll('.look').forEach(button=>button.addEventListener('click',()=>{
-  document.querySelectorAll('.look').forEach(item=>item.classList.remove('active'));
-  button.classList.add('active');
-  lookFigure.className='look-figure '+button.dataset.look;
-  lookName.textContent=lookNames[button.dataset.look];
+const wardrobe={
+  top:[
+    {id:'silk',name:'Espresso silk',note:'Draped neckline',tone:'#2b1b1a'},
+    {id:'rust',name:'Rust wrap',note:'Soft sculpted waist',tone:'#a55031'},
+    {id:'ivory',name:'Ivory blouse',note:'Architectural sleeve',tone:'#e1d3bf'},
+    {id:'black',name:'Midnight bodice',note:'Gathered & fitted',tone:'#171416'}
+  ],
+  bottom:[
+    {id:'trousers',name:'Tailored trouser',note:'Long clean line',tone:'#242022'},
+    {id:'midi',name:'Rose midi',note:'Fluid movement',tone:'#713247'},
+    {id:'wrap',name:'Rust wrap skirt',note:'Warm & effortless',tone:'#9f4d31'},
+    {id:'column',name:'Black column',note:'Evening silhouette',tone:'#151315'}
+  ],
+  shoes:[
+    {id:'heels',name:'Sculpted heel',note:'Metallic accent',tone:'#aa823e'},
+    {id:'loafer',name:'Polished loafer',note:'City confidence',tone:'#291818'},
+    {id:'sandal',name:'Fine sandal',note:'Barely-there gold',tone:'#c3a15b'}
+  ],
+  bag:[
+    {id:'mini',name:'Espresso mini',note:'Structured leather',tone:'#3a2021'},
+    {id:'crossbody',name:'Black crossbody',note:'Hands-free polish',tone:'#171416'},
+    {id:'clutch',name:'Gold clutch',note:'Celebration piece',tone:'#b18a45'}
+  ],
+  jewelry:[
+    {id:'hoops',name:'Gold hoops',note:'Joy signature',tone:'#c9a252'},
+    {id:'drops',name:'Fine drops',note:'Quiet brilliance',tone:'#e1c983'},
+    {id:'minimal',name:'Minimal gold',note:'Clean & modern',tone:'#a8813e'}
+  ]
+};
+const selections={top:'silk',bottom:'trousers',shoes:'heels',bag:'mini',jewelry:'hoops'};
+const categoryLabels={top:'Top',bottom:'Bottom',shoes:'Shoes',bag:'Bag',jewelry:'Jewels'};
+const model=document.getElementById('joy-model');
+const options=document.getElementById('wardrobe-options');
+const composerTitle=document.getElementById('composer-title');
+const composerSummary=document.getElementById('composer-summary');
+let activeCategory='top';
+
+function piece(category,id){return wardrobe[category].find(item=>item.id===id)}
+function renderOptions(){
+  options.innerHTML=wardrobe[activeCategory].map(item=>`<button class="piece ${selections[activeCategory]===item.id?'active':''}" data-piece="${item.id}"><i style="--swatch:${item.tone}"></i><span><b>${item.name}</b><small>${item.note}</small></span><em>${selections[activeCategory]===item.id?'SELECTED':'ADD'}</em></button>`).join('');
+  options.querySelectorAll('.piece').forEach(button=>button.addEventListener('click',()=>{
+    selections[activeCategory]=button.dataset.piece;
+    model.dataset[activeCategory]=button.dataset.piece;
+    renderOptions(); updateComposer();
+  }));
+}
+function updateComposer(){
+  const top=piece('top',selections.top), bottom=piece('bottom',selections.bottom), shoes=piece('shoes',selections.shoes);
+  const names=[top.name,bottom.name,piece('bag',selections.bag).name,piece('jewelry',selections.jewelry).name];
+  composerTitle.textContent=selections.top==='rust'?'Rust & Radiance':selections.top==='black'?'Midnight Joy':selections.top==='ivory'?'Ivory Confidence':'Espresso & Gold';
+  composerSummary.textContent=names.join(' · ');
+  model.classList.remove('styled'); void model.offsetWidth; model.classList.add('styled');
+}
+document.querySelectorAll('.category').forEach(button=>button.addEventListener('click',()=>{
+  document.querySelectorAll('.category').forEach(item=>item.classList.remove('active'));
+  button.classList.add('active'); activeCategory=button.dataset.category; renderOptions();
 }));
-document.querySelector('.save-look')?.addEventListener('click',()=>{
-  localStorage.setItem('joySavedLook',lookName.textContent);
-  summonAttendant('service');
-  notify('Added to Joy’s private edit.');
+document.getElementById('random-look').addEventListener('click',()=>{
+  Object.keys(wardrobe).forEach(category=>{
+    const items=wardrobe[category]; selections[category]=items[Math.floor(Math.random()*items.length)].id;
+    model.dataset[category]=selections[category];
+  });
+  renderOptions();updateComposer();notify('A new edit, composed for Joy.');
 });
+function renderSaved(){
+  const saved=JSON.parse(localStorage.getItem('joySavedLooks')||'[]');
+  const panel=document.getElementById('saved-edit');
+  panel.hidden=!saved.length;
+  document.getElementById('saved-looks').innerHTML=saved.map((look,index)=>`<div class="saved-look"><span><b>${look.title}</b><small>${look.occasion}</small></span><button data-remove="${index}" aria-label="Remove saved look">×</button></div>`).join('');
+  panel.querySelectorAll('[data-remove]').forEach(button=>button.addEventListener('click',()=>{
+    saved.splice(Number(button.dataset.remove),1);localStorage.setItem('joySavedLooks',JSON.stringify(saved));renderSaved();
+  }));
+}
+document.getElementById('save-outfit').addEventListener('click',()=>{
+  const saved=JSON.parse(localStorage.getItem('joySavedLooks')||'[]');
+  saved.unshift({title:composerTitle.textContent,occasion:document.getElementById('occasion').value,pieces:{...selections}});
+  localStorage.setItem('joySavedLooks',JSON.stringify(saved.slice(0,6)));
+  renderSaved();summonAttendant('service');notify('Complete look saved to Joy’s edit.');
+});
+renderOptions();renderSaved();
 
 document.querySelectorAll('.js-attendant').forEach(button=>button.addEventListener('click',()=>summonAttendant(button.dataset.action)));
 
