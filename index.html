@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="preload" as="image" href="assets/joy-estate.jpg">
-  <link rel="stylesheet" href="styles.css?v=18">
+  <link rel="stylesheet" href="styles.css?v=19">
   <title>Joy's World</title>
 </head>
 <body>
@@ -16,6 +16,7 @@
   <div class="estate-entrance" id="estate-entrance">
     <button class="estate-gate" id="estate-gate" aria-label="Enter Joy's World">
       <img src="assets/joy-estate.jpg" alt="Joy’s elegant white estate at dusk">
+      <span class="estate-water" aria-hidden="true"><i></i></span>
       <span class="estate-vignette"></span>
       <span class="estate-copy">
         <small>A PRIVATE WORLD, MADE FOR YOU</small>
@@ -31,6 +32,7 @@
       <p class="eyebrow">THE PRIVATE RESIDENCE</p>
       <h1>Joy’s World</h1>
     </div>
+    <button class="icon-button sound-button" id="ambience-toggle" aria-label="Mute house ambience" aria-pressed="false">♪</button>
     <button class="icon-button js-attendant" aria-label="Open personal service" data-action="service">✦</button>
   </header>
 
@@ -207,6 +209,7 @@
   </div>
 
   <div class="toast" id="toast" role="status"></div>
-  <script src="app.js?v=18"></script>
+  <audio id="house-jazz" src="assets/joy-house-jazz.mp3" preload="metadata" loop></audio>
+  <script src="app.js?v=19"></script>
 </body>
 </html>
