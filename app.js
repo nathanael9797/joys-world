@@ -4,7 +4,7 @@ const houseJazz=document.getElementById('house-jazz');
 const ambienceToggle=document.getElementById('ambience-toggle');
 let enteringEstate=false;
 
-const doorLatch=new Audio('./assets/door-latch.wav');
+const doorLatch=new Audio('./assets/door-latch.wav?v=20');
 doorLatch.preload='auto';
 doorLatch.volume=.82;
 let ambienceMuted=localStorage.getItem('joyAmbienceMuted')==='true';
