@@ -2,59 +2,28 @@ const estateEntrance=document.getElementById('estate-entrance');
 const estateGate=document.getElementById('estate-gate');
 let enteringEstate=false;
 
-function playDoorClick(delay=.48){
+const doorLatch=new Audio('./assets/door-latch.wav');
+doorLatch.preload='auto';
+
+function playDoorClick(){
   try{
-    const AudioCtx=window.AudioContext||window.webkitAudioContext;
-    if(!AudioCtx)return;
-    const audio=new AudioCtx();
-    audio.resume?.();
-    const when=audio.currentTime+delay;
-
-    function impact(start,duration,volume,frequency,q=1){
-      const size=Math.max(1,Math.floor(audio.sampleRate*duration));
-      const buffer=audio.createBuffer(1,size,audio.sampleRate);
-      const data=buffer.getChannelData(0);
-      let previous=0;
-      for(let i=0;i<size;i++){
-        const white=Math.random()*2-1;
-        previous=previous*.32+white*.68;
-        data[i]=previous*Math.pow(1-i/size,8);
-      }
-      const source=audio.createBufferSource();
-      const filter=audio.createBiquadFilter();
-      const gain=audio.createGain();
-      source.buffer=buffer;
-      filter.type='bandpass';
-      filter.frequency.value=frequency;
-      filter.Q.value=q;
-      gain.gain.setValueAtTime(volume,start);
-      gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
-      source.connect(filter);
-      filter.connect(gain);
-      gain.connect(audio.destination);
-      source.start(start);
-    }
-
-    // Dry latch: metal tongue retracts, then the lock body catches.
-    impact(when,.028,.78,3200,.7);
-    impact(when+.038,.032,.58,1850,.9);
-    impact(when+.092,.052,.9,720,.65);
-    impact(when+.112,.085,.64,330,.55);
-    setTimeout(()=>audio.close(),1000);
+    doorLatch.pause();
+    doorLatch.currentTime=0;
+    doorLatch.volume=1;
+    doorLatch.play().catch(()=>{});
   }catch(error){}
 }
 function enterEstate(){
   if(enteringEstate)return;
   enteringEstate=true;
-  playDoorClick(reduceMotion?0:.58);
+  playDoorClick();
   if(reduceMotion){
     estateEntrance.classList.add('gone');
     setTimeout(()=>estateEntrance.remove(),350);
     return;
   }
-  estateEntrance.classList.add('approaching');
-  setTimeout(()=>estateEntrance.classList.add('door-open'),930);
-  setTimeout(()=>estateEntrance.remove(),1480);
+  setTimeout(()=>estateEntrance.classList.add('door-open'),120);
+  setTimeout(()=>estateEntrance.remove(),720);
 }
 estateGate?.addEventListener('click',enterEstate);
 
