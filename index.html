@@ -46,28 +46,51 @@
     <section class="room wardrobe-room" id="wardrobe" aria-labelledby="wardrobe-title">
       <div class="wardrobe-shell">
         <p class="eyebrow">THE DRESSING ROOM</p>
-        <h2 id="wardrobe-title">Joy’s Wardrobe</h2>
-        <p class="lede">A private edit of silhouettes, colour and mood — chosen entirely for you.</p>
-        <div class="wardrobe-scene">
-          <div class="mirror">
-            <div class="mirror-glow"></div>
-            <div class="look-figure" id="look-figure" aria-hidden="true">
-              <i class="look-head"></i><i class="look-body"></i><i class="look-skirt"></i>
-            </div>
-            <p id="look-name">The Bordeaux Evening</p>
+        <h2 id="wardrobe-title">The Outfit Atelier</h2>
+        <p class="lede">Compose a complete look for Joy — piece by piece.</p>
+
+        <div class="atelier-preview">
+          <div class="occasion-row">
+            <span>OCCASION</span>
+            <select id="occasion">
+              <option>Date night</option><option>Sunday elegance</option><option>City day</option><option>Celebration</option><option>Power meeting</option>
+            </select>
           </div>
-          <div class="rail" aria-hidden="true"><span></span><i></i><i></i><i></i></div>
+          <div class="joy-model" id="joy-model" data-top="silk" data-bottom="trousers" data-shoes="heels" data-bag="mini" data-jewelry="hoops">
+            <div class="model-hair"></div><div class="model-head"></div><div class="model-necklace"></div>
+            <div class="model-top"></div><div class="model-arms"></div><div class="model-bottom"></div>
+            <div class="model-shoes"></div><div class="model-bag"></div><div class="model-earrings"></div>
+          </div>
+          <div class="look-summary">
+            <small>JOY’S CURRENT EDIT</small>
+            <strong id="composer-title">Espresso & Gold</strong>
+            <span id="composer-summary">Silk top · tailored trousers · sculpted heels</span>
+          </div>
         </div>
-        <div class="look-selector" role="group" aria-label="Select a wardrobe look">
-          <button class="look active" data-look="bordeaux"><i></i><span><b>Bordeaux Evening</b><small>Confident · sculptural</small></span></button>
-          <button class="look" data-look="ivory"><i></i><span><b>Ivory Sunday</b><small>Soft · luminous</small></span></button>
-          <button class="look" data-look="emerald"><i></i><span><b>Emerald Arrival</b><small>Regal · composed</small></span></button>
+
+        <div class="composer">
+          <div class="category-tabs" role="tablist">
+            <button class="category active" data-category="top">TOP</button>
+            <button class="category" data-category="bottom">BOTTOM</button>
+            <button class="category" data-category="shoes">SHOES</button>
+            <button class="category" data-category="bag">BAG</button>
+            <button class="category" data-category="jewelry">JEWELS</button>
+          </div>
+          <div class="wardrobe-options" id="wardrobe-options" aria-live="polite"></div>
         </div>
-        <button class="wake-button save-look"><span>SAVE THIS LOOK</span><small>TO JOY’S EDIT</small></button>
+
+        <div class="atelier-actions">
+          <button class="random-look" id="random-look">SURPRISE ME</button>
+          <button class="save-outfit" id="save-outfit">SAVE COMPLETE LOOK</button>
+        </div>
+        <div class="saved-edit" id="saved-edit" hidden>
+          <p class="eyebrow">JOY’S SAVED EDIT</p>
+          <div id="saved-looks"></div>
+        </div>
       </div>
     </section>
 
-    <section class="room money-room" id="money" aria-labelledby="money-title">
+    <section class="room money-room id="money" aria-labelledby="money-title">
       <div class="machine-shell">
         <div class="machine-head">
           <div>
