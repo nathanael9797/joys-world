@@ -2,7 +2,7 @@ const estateEntrance=document.getElementById('estate-entrance');
 const estateGate=document.getElementById('estate-gate');
 let enteringEstate=false;
 
-function playDoorClick(delay=.5){
+function playDoorClick(delay=.48){
   try{
     const AudioCtx=window.AudioContext||window.webkitAudioContext;
     if(!AudioCtx)return;
@@ -10,21 +10,23 @@ function playDoorClick(delay=.5){
     audio.resume?.();
     const when=audio.currentTime+delay;
 
-    function noiseHit(start,duration,volume,filterType,frequency){
+    function impact(start,duration,volume,frequency,q=1){
       const size=Math.max(1,Math.floor(audio.sampleRate*duration));
       const buffer=audio.createBuffer(1,size,audio.sampleRate);
       const data=buffer.getChannelData(0);
+      let previous=0;
       for(let i=0;i<size;i++){
-        const envelope=Math.pow(1-i/size,5);
-        data[i]=(Math.random()*2-1)*envelope;
+        const white=Math.random()*2-1;
+        previous=previous*.32+white*.68;
+        data[i]=previous*Math.pow(1-i/size,8);
       }
       const source=audio.createBufferSource();
       const filter=audio.createBiquadFilter();
       const gain=audio.createGain();
       source.buffer=buffer;
-      filter.type=filterType;
+      filter.type='bandpass';
       filter.frequency.value=frequency;
-      filter.Q.value=1.2;
+      filter.Q.value=q;
       gain.gain.setValueAtTime(volume,start);
       gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
       source.connect(filter);
@@ -33,28 +35,12 @@ function playDoorClick(delay=.5){
       source.start(start);
     }
 
-    // Small metal latch retracts.
-    noiseHit(when,.045,.48,'highpass',1400);
-    noiseHit(when+.052,.035,.34,'bandpass',2300);
-
-    // Heavy lock tongue lands, followed by the wooden door settling.
-    noiseHit(when+.105,.075,.62,'lowpass',520);
-    noiseHit(when+.145,.16,.38,'lowpass',210);
-
-    const body=audio.createOscillator();
-    const bodyGain=audio.createGain();
-    body.type='sine';
-    body.frequency.setValueAtTime(92,when+.11);
-    body.frequency.exponentialRampToValueAtTime(58,when+.25);
-    bodyGain.gain.setValueAtTime(.0001,when+.1);
-    bodyGain.gain.exponentialRampToValueAtTime(.22,when+.115);
-    bodyGain.gain.exponentialRampToValueAtTime(.0001,when+.29);
-    body.connect(bodyGain);
-    bodyGain.connect(audio.destination);
-    body.start(when+.1);
-    body.stop(when+.3);
-
-    setTimeout(()=>audio.close(),1300);
+    // Dry latch: metal tongue retracts, then the lock body catches.
+    impact(when,.028,.78,3200,.7);
+    impact(when+.038,.032,.58,1850,.9);
+    impact(when+.092,.052,.9,720,.65);
+    impact(when+.112,.085,.64,330,.55);
+    setTimeout(()=>audio.close(),1000);
   }catch(error){}
 }
 function enterEstate(){
