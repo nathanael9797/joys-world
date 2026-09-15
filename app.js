@@ -276,7 +276,7 @@ function wornAsset(category,id){
   } else {
     // Approved portrait already contains studs: minimal adds no duplicate marker.
     // Earlobe contacts are measured from the locked portrait, not the old head.
-    drawing=id==='minimal'?'':[{x:154,y:133,rx:2.6},{x:258,y:139,rx:2.1}].map(({x,y,rx})=>id==='drops'?`<path d="M${x} ${y} L${x-.4} ${y+8}" stroke="#bba064" stroke-width="1"/><ellipse cx="${x-.4}" cy="${y+10}" rx="1.7" ry="3" fill="#c6ad71"/>`:`<path d="M${x} ${y} C${x-rx*2} ${y+2},${x-rx*2} ${y+9},${x} ${y+9} C${x+rx*2} ${y+9},${x+rx*2} ${y+2},${x} ${y}" fill="none" stroke="#baa063" stroke-width="1.2"/>`).join('');
+    drawing=id==='minimal'?'':[{x:154,y:133-16*938/425,rx:2.6},{x:258,y:139-16*938/425,rx:2.1}].map(({x,y,rx})=>id==='drops'?`<path d="M${x} ${y} L${x-.4} ${y+8}" stroke="#bba064" stroke-width="1"/><ellipse cx="${x-.4}" cy="${y+10}" rx="1.7" ry="3" fill="#c6ad71"/>`:`<path d="M${x} ${y} C${x-rx*2} ${y+2},${x-rx*2} ${y+9},${x} ${y+9} C${x+rx*2} ${y+9},${x+rx*2} ${y+2},${x} ${y}" fill="none" stroke="#baa063" stroke-width="1.2"/>`).join('');
   }
   return `<svg class="joy-worn joy-worn-${category}" data-worn="${category}" viewBox="0 0 420 938" preserveAspectRatio="none">${defs}${drawing}</svg>`;
 }
