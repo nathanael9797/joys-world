@@ -184,16 +184,49 @@ const composerSummary=document.getElementById('composer-summary');
 let activeCategory='top';
 
 function piece(category,id){return wardrobe[category].find(item=>item.id===id)}
-const garmentLayer={top:['.model-top','.model-arms'],bottom:['.model-bottom'],shoes:['.model-shoes'],bag:['.model-bag'],jewelry:['.model-jewelry']};
+// JOY_BASE_LOCKED: all coordinates are measured against the immutable 420×938 base.
+// These are dedicated worn assets, never product thumbnails or mannequin shapes.
+const fittedStage=model.querySelector('.joy-fitted-layers');
+const fittedPaths={
+  top:{
+    silk:'M133 173 Q143 203 149 218 Q195 248 241 213 L250 174 L262 179 Q271 229 254 286 Q239 327 254 367 Q203 383 128 365 Q146 326 136 290 Q120 245 125 186Z',
+    black:'M133 173 L143 175 Q147 217 165 224 Q208 241 240 214 L248 174 L258 176 Q271 223 255 285 Q242 325 255 368 Q195 383 128 365 Q144 325 135 286 Q119 236 125 186Z',
+    rust:'M132 174 Q151 188 194 229 Q225 197 250 174 L263 180 Q270 238 250 291 L256 369 Q199 388 127 366 Q145 319 136 284 Q121 235 125 188Z',
+    ivory:'M132 173 Q146 189 193 198 Q233 191 249 173 L268 178 Q276 226 257 279 Q243 321 256 367 Q200 381 127 364 Q145 321 136 279 Q121 224 124 187Z'
+  },
+  bottom:{
+    trousers:'M127 361 Q189 378 254 365 Q271 402 270 453 Q281 545 301 614 Q321 688 354 805 L326 812 Q295 733 273 679 Q250 634 239 584 L196 462 Q184 449 177 472 Q184 543 178 593 Q174 650 195 788 L164 797 Q133 701 126 638 Q110 573 105 522 Q82 435 99 396Z',
+    midi:'M127 361 Q190 378 254 365 Q273 417 278 469 Q277 558 293 660 Q219 688 119 666 Q113 570 99 478 Q87 422 104 390Z',
+    wrap:'M127 361 Q190 378 254 365 Q271 409 277 461 L316 738 Q242 773 132 746 Q120 636 105 524 Q86 428 103 391Z',
+    column:'M127 361 Q191 378 254 365 Q274 420 276 470 Q282 590 310 712 L333 824 Q239 855 153 831 L118 670 Q102 562 97 481 Q89 418 105 390Z'
+  }
+};
+function wornAsset(category,id){
+  const item=piece(category,id), tone=item.tone;
+  const defs=`<defs><linearGradient id="cloth-${category}" x1="0" x2="1"><stop stop-color="${tone}"/><stop offset=".38" stop-color="${tone}"/><stop offset=".57" stop-color="${tone}" stop-opacity=".83"/><stop offset="1" stop-color="${tone}"/></linearGradient><mask id="hands-${category}"><rect width="420" height="938" fill="white"/><path d="M99 350 Q116 337 137 347 L158 371 L151 391 L115 383 L96 370Z M286 464 Q303 464 315 493 L317 526 L301 548 L286 537 L280 506Z" fill="black"/></mask></defs>`;
+  let drawing='';
+  if(category==='top'){
+    drawing=`<g mask="url(#hands-top)"><path d="${fittedPaths.top[id]}" fill="url(#cloth-top)"/><g fill="none" stroke="${id==='ivory'?'#9f8972':'#b2937b'}" stroke-opacity=".25" stroke-width="1.5"><path d="M139 275 Q155 299 144 343 M250 273 Q237 300 249 345 M132 359 Q190 375 251 361"/>${id==='rust'?'<path d="M153 190 Q213 239 251 281 L135 338 M135 339 Q187 349 251 335"/>':'<path d="M149 220 Q197 248 240 216 M154 229 Q195 253 231 230"/>'}</g>${id==='ivory'?'<path d="M123 177 Q99 170 87 194 Q70 238 36 285 Q26 304 41 325 L89 367 L104 348 L60 302 Q101 256 121 218Z M262 177 Q292 177 298 211 L309 330 L309 467 L287 471 L277 336 L265 235Z" fill="url(#cloth-top)"/><path d="M40 294 Q53 299 65 303 M281 329 L303 334 M87 355 L98 343 M289 458 L307 455" fill="none" stroke="#9f8972" stroke-opacity=".35" stroke-width="2"/>':''}</g>`;
+  } else if(category==='bottom'){
+    drawing=`<g mask="url(#hands-bottom)"><path d="${fittedPaths.bottom[id]}" fill="url(#cloth-bottom)"/><g fill="none" stroke="${id==='midi'||id==='wrap'?'#d99887':'#8b7e79'}" stroke-opacity=".22" stroke-width="1.6"><path d="M126 366 Q191 381 254 370"/>${id==='trousers'?'<path d="M145 400 Q141 482 148 554 L175 779 M236 401 Q250 489 260 557 L339 798 M181 385 L179 438"/>':id==='wrap'?'<path d="M242 382 Q201 465 182 562 L163 751 M258 451 Q259 583 293 732"/>':'<path d="M142 401 Q127 487 150 636 M235 402 Q253 528 260 655"/>'}</g></g>`;
+  } else if(category==='shoes'){
+    const feet=['M169 825 Q182 817 198 829 L203 863 Q208 884 188 886 Q155 886 157 867Z','M332 862 Q345 854 361 869 L375 894 Q390 924 364 928 Q338 931 333 912Z'];
+    drawing=feet.map((d,i)=>`<path d="${d}" fill="${id==='sandal'?'#925b3b':id==='loafer'?'#25191a':'#211819'}"/><path d="${i===0?'M160 873 Q178 888 199 875':'M339 917 Q359 934 379 916'}" fill="none" stroke="${id==='loafer'?'#0d090a':'#b69a59'}" stroke-width="2"/>${id==='sandal'?`<path d="${i===0?'M163 857 Q181 868 200 856 M169 832 L194 845':'M334 893 Q354 906 371 896 M339 873 L363 888'}" fill="none" stroke="#c6a76b" stroke-width="4"/>`:`<path d="${i===0?'M169 829 Q183 836 196 829 Q199 850 193 859 Q179 869 166 855Z':'M337 867 Q351 877 360 869 L369 892 Q358 903 343 894Z'}" fill="#925b3b"/>`}${id==='loafer'?`<path d="${i===0?'M163 860 L197 863':'M340 898 L372 907'}" stroke="#ad8b50" stroke-width="3"/>`:''}`).join('');
+  } else if(category==='bag'){
+    drawing=id==='clutch'?'<path d="M311 471 L360 479 L356 512 L309 506Z" fill="#b49656" stroke="#e1c889" stroke-width="1.5"/><path d="M312 478 L357 485" stroke="#745628"/>':`<g>${id==='crossbody'?'<path d="M138 178 Q191 263 272 386 L325 459" stroke="#1c1515" stroke-width="7" fill="none"/><path d="M139 178 Q192 263 273 386 L326 459" stroke="#b08b4a" stroke-width=".8" fill="none"/>':'<path d="M310 477 Q302 448 321 449 Q341 452 332 481" fill="none" stroke="#62462f" stroke-width="5"/>'}<path d="M303 473 L346 480 L353 530 Q329 543 300 530Z" fill="${id==='crossbody'?'#211b1b':'#472b26'}" stroke="#836440" stroke-width="1.4"/><path d="M306 483 L344 489 L342 507 L306 501Z" fill="none" stroke="#9d7c4b" stroke-opacity=".4"/><rect x="322" y="493" width="8" height="5" rx="1" fill="#c6a15c"/></g>`;
+  } else {
+    drawing=[154,234].map(x=>id==='minimal'?`<circle cx="${x}" cy="136" r="2.4" fill="#c8ac67"/>`:id==='drops'?`<path d="M${x} 134 L${x} 151" stroke="#bba064" stroke-width="1.5"/><ellipse cx="${x}" cy="152" rx="2" ry="4" fill="#d9c186"/>`:`<ellipse cx="${x}" cy="141" rx="3" ry="5" fill="none" stroke="#c9aa61" stroke-width="1.5"/>`).join('');
+  }
+  return `<svg class="joy-worn joy-worn-${category}" data-worn="${category}" viewBox="0 0 420 938" preserveAspectRatio="none">${defs}${drawing}</svg>`;
+}
+function renderWorn(category){
+  let layer=fittedStage.querySelector(`[data-worn="${category}"]`);
+  const template=document.createElement('template');template.innerHTML=wornAsset(category,selections[category]);
+  if(layer)layer.replaceWith(template.content.firstChild);else fittedStage.append(template.content.firstChild);
+}
 function fitGarment(category){
-  const layers=garmentLayer[category]||[];
-  layers.forEach(selector=>{
-    const layer=model.querySelector(selector);
-    if(!layer)return;
-    layer.classList.remove('couture-fit');
-    void layer.offsetWidth;
-    layer.classList.add('couture-fit');
-  });
+  renderWorn(category);
+  fittedStage.querySelector(`[data-worn="${category}"]`).classList.add('couture-fit');
 }
 function renderOptions(){
   options.innerHTML=wardrobe[activeCategory].map(item=>`<button class="piece ${selections[activeCategory]===item.id?'active':''}" data-piece="${item.id}"><i class="piece-thumb ${activeCategory}-${item.id}" style="--swatch:${item.tone}"></i><span><b>${item.name}</b><small>${item.note}</small></span><em>${selections[activeCategory]===item.id?'SELECTED':'ADD'}</em></button>`).join('');
@@ -217,7 +250,7 @@ function applyOccasion(name,announce=true){
   Object.keys(selections).forEach(category=>{
     selections[category]=edit[category];
     model.dataset[category]=edit[category];
-    if(announce)fitGarment(category);
+    if(announce)fitGarment(category);else renderWorn(category);
   });
   renderOptions();updateComposer();
   if(announce)notify(name+' edit composed for Joy.');
