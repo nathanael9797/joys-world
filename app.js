@@ -89,11 +89,12 @@ let actionCount=0;
 
 const portal=document.getElementById('room-portal');
 const portalName=document.getElementById('portal-name');
-const roomNames={salon:'The Private Salon',wardrobe:'Joy’s Wardrobe',money:'The Money Room'};
+const roomNames={salon:'The Private Salon',wardrobe:'Joy’s Wardrobe',money:'The Money Room',retreat:'The Retreat',treasure:'The Treasure Room'};
 let roomMoving=false;
 async function showRoom(id){
   if(roomMoving||document.getElementById(id)?.classList.contains('active'))return;
   roomMoving=true;
+  if(id!=='retreat')stopQuietMoment();
   if(!reduceMotion){
     portalName.textContent=roomNames[id]||'Welcome, Madam';
     portal.classList.add('entering');
@@ -426,6 +427,88 @@ wake.addEventListener('click',async()=>{
   wake.querySelector('span').textContent='RUN AGAIN';
   wake.disabled=false;
 });
+
+// Retreat: optional, interruption-free atmosphere. Reuse the single house-jazz instance.
+const retreatScene=document.querySelector('.retreat-scene');
+const retreatWhispers={candlelight:'Let the day soften around you.',moonlight:'A quiet sky. A little room to dream.',warmth:'You are allowed to take up this peaceful space.'};
+document.querySelectorAll('.retreat-moods [data-mood]').forEach(button=>button.addEventListener('click',()=>{
+  retreatScene.dataset.mood=button.dataset.mood;
+  document.getElementById('retreat-whisper').textContent=retreatWhispers[button.dataset.mood];
+  document.querySelectorAll('.retreat-moods [data-mood]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+}));
+let quietTimer=0,quietActive=false;
+const breathToggle=document.getElementById('breath-toggle');
+const breathCaption=document.getElementById('breath-caption');
+function stopQuietMoment(){
+  clearTimeout(quietTimer);quietActive=false;
+  document.querySelector('.retreat-moment')?.classList.remove('breathing','breath-in');
+  breathToggle?.setAttribute('aria-pressed','false');
+  if(breathToggle)breathToggle.textContent='BEGIN A QUIET MOMENT';
+  if(breathCaption)breathCaption.textContent='Stay as long as you like.';
+}
+function quietPhase(inhale){
+  if(!quietActive)return;
+  document.querySelector('.retreat-moment').classList.toggle('breath-in',inhale);
+  breathCaption.textContent=inhale?'A gentle breath in…':'Let it go, slowly…';
+  quietTimer=setTimeout(()=>quietPhase(!inhale),inhale?4000:6000);
+}
+breathToggle.addEventListener('click',()=>{
+  if(quietActive){stopQuietMoment();return;}
+  quietActive=true;breathToggle.setAttribute('aria-pressed','true');breathToggle.textContent='RETURN TO STILLNESS';
+  document.querySelector('.retreat-moment').classList.add('breathing');quietPhase(true);
+});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopQuietMoment()});
+const kindness=['You do not have to earn your rest.','Nothing is required of you in this moment.','Let something small and beautiful be enough.','Your softness belongs here.','There is room for you, exactly as you are.'];
+let kindnessIndex=0;
+document.getElementById('retreat-note').addEventListener('click',()=>{kindnessIndex=(kindnessIndex+1)%kindness.length;document.getElementById('retreat-kindness').textContent=kindness[kindnessIndex]});
+
+// Treasure Room: device-local IndexedDB, never transmit personal photographs.
+let memoryDbPromise,photoUrls=[];
+function memoryDb(){
+  if(!memoryDbPromise)memoryDbPromise=new Promise((resolve,reject)=>{
+    const request=indexedDB.open('joy-treasures',1);
+    request.onupgradeneeded=()=>request.result.createObjectStore('moments',{keyPath:'id'});
+    request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);
+  }).catch(error=>{memoryDbPromise=null;throw error});
+  return memoryDbPromise;
+}
+async function memoryOperation(mode,action){
+  const db=await memoryDb();
+  return new Promise((resolve,reject)=>{const tx=db.transaction('moments',mode);let result;const request=action(tx.objectStore('moments'));request.onsuccess=()=>{result=request.result};tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)});
+}
+const memoryForm=document.getElementById('treasure-form');
+const memoryError=document.getElementById('memory-error');
+function toggleMemoryForm(open){memoryForm.hidden=!open;document.getElementById('treasure-add').setAttribute('aria-expanded',String(open));if(open)document.getElementById('memory-title').focus()}
+document.getElementById('treasure-add').addEventListener('click',()=>toggleMemoryForm(memoryForm.hidden));
+document.getElementById('treasure-cancel').addEventListener('click',()=>toggleMemoryForm(false));
+async function renderMemories(){
+  const collection=document.getElementById('treasure-collection');
+  try{
+    const moments=await memoryOperation('readonly',s=>s.getAll());
+    if(!moments.length)return;
+    photoUrls.forEach(URL.revokeObjectURL);photoUrls=[];collection.replaceChildren();
+    moments.sort((a,b)=>b.created-a.created).forEach(moment=>{
+      const card=document.createElement('article');card.className='memory-card';
+      if(moment.photo){const img=document.createElement('img');const url=URL.createObjectURL(moment.photo);photoUrls.push(url);img.src=url;img.alt=moment.title;img.loading='lazy';card.append(img)}
+      const title=document.createElement('h3');title.textContent=moment.title;card.append(title);
+      if(moment.words){const text=document.createElement('p');text.textContent=moment.words;card.append(text)}
+      collection.append(card);
+    });
+  }catch(error){memoryError.textContent='Device storage is unavailable. You can still enjoy your letter; no memories have been uploaded.'}
+}
+memoryForm.addEventListener('submit',async event=>{
+  event.preventDefault();memoryError.textContent='';const submit=memoryForm.querySelector('[type="submit"]');submit.disabled=true;
+  try{
+    const photo=document.getElementById('memory-photo').files[0];
+    if(photo&&(!['image/jpeg','image/png','image/webp'].includes(photo.type)||photo.size>8*1024*1024))throw Error('Please choose a JPG, PNG or WebP photo smaller than 8 MB.');
+    const title=document.getElementById('memory-title').value.trim();if(!title)throw Error('Give your moment a little title.');
+    await memoryOperation('readwrite',s=>s.put({id:crypto.randomUUID(),created:Date.now(),title,words:document.getElementById('memory-words').value.trim(),photo:photo||null}));
+    memoryForm.reset();toggleMemoryForm(false);await renderMemories();notify('A little treasure, kept close.');
+  }catch(error){memoryError.textContent=error.message||'This moment could not be saved. Please keep your original photo.'}finally{submit.disabled=false}
+});
+renderMemories();
+addEventListener('pagehide',()=>{stopQuietMoment();photoUrls.forEach(URL.revokeObjectURL)});
+addEventListener('pageshow',event=>{if(event.persisted)renderMemories()});
 
 if('serviceWorker' in navigator){
   addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));

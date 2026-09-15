@@ -92,6 +92,50 @@
 .fabric-swatch>span{display:block;width:24px;height:24px;border-radius:50%;background:linear-gradient(120deg,rgba(255,255,255,.1),transparent 55%,rgba(0,0,0,.15)),var(--fabric-color);box-shadow:inset 0 0 0 1px rgba(230,205,169,.18)}
 .fabric-swatch[aria-pressed=true]{border-color:var(--gold);box-shadow:0 0 0 1px rgba(140,104,43,.3)}
 .fabric-swatch:focus-visible{outline:2px solid var(--cream);outline-offset:2px}
+/* Rooms 02 / 04: quiet wellbeing, not appointments or obligations. */
+.retreat-shell,.treasure-shell{max-width:720px;margin:auto}
+.retreat-scene{position:relative;height:clamp(360px,110vw,650px);margin:25px 0 10px;overflow:hidden;border:1px solid var(--line);background:#201119}
+.retreat-scene>img{width:100%;height:100%;object-fit:cover;display:block}
+.retreat-light{position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,8,12,.02),transparent 55%,rgba(18,8,12,.75));transition:background 1.2s ease}
+.retreat-scene[data-mood=moonlight] .retreat-light{background:linear-gradient(180deg,rgba(29,36,63,.24),rgba(14,13,30,.12) 55%,rgba(18,8,12,.8))}
+.retreat-scene[data-mood=warmth] .retreat-light{background:linear-gradient(180deg,rgba(168,110,48,.13),rgba(128,59,32,.13) 55%,rgba(18,8,12,.75))}
+.retreat-scene-copy{position:absolute;bottom:24px;left:24px;right:24px;color:var(--cream)}
+.retreat-scene-copy small{font-size:8px;letter-spacing:.24em;color:var(--gold)}
+.retreat-scene-copy p{font:italic 23px/1.4 Georgia;margin:10px 0 0;max-width:330px}
+.retreat-moods{display:flex;gap:6px;flex-wrap:wrap}
+.retreat-moods button{flex:1;min-width:90px;border:1px solid var(--line);background:rgba(18,9,13,.55);color:var(--muted);padding:12px 8px;font:12px Georgia}
+.retreat-moods button[aria-pressed=true]{border-color:var(--gold2);color:var(--gold);background:rgba(89,30,48,.25)}
+.retreat-moment{margin:24px 0;padding:25px 18px;text-align:center;border:1px solid var(--line);background:radial-gradient(ellipse at center,rgba(118,68,73,.12),transparent 70%)}
+.retreat-moment h3,.treasure-heading h3{font:25px Georgia;font-weight:400;margin:10px 0}
+.retreat-moment>p:not(.eyebrow){font:14px/1.5 Georgia;color:var(--muted)}
+.breath-orb{width:70px;height:70px;border-radius:50%;margin:28px auto;border:1px solid var(--gold2);background:radial-gradient(circle,rgba(217,184,117,.06),transparent);box-shadow:inset 0 0 0 7px rgba(218,187,119,.025);transition:transform 6s ease-in-out,opacity 6s ease-in-out;opacity:.6}
+.breath-in .breath-orb{transform:scale(1.25);opacity:1;transition-duration:4s}
+.retreat-moment button,.memory-actions button,.treasure-heading button{border:1px solid var(--gold2);background:rgba(48,18,29,.65);color:var(--gold);padding:13px 16px;font-size:9px;letter-spacing:.1em}
+.retreat-note{display:flex;justify-content:space-between;align-items:center;width:100%;padding:18px;border:1px solid var(--line);background:rgba(42,18,28,.6);color:var(--cream);font:16px Georgia}
+.retreat-note span{color:var(--gold);font-size:23px}
+.retreat-kindness{text-align:center;min-height:64px;color:var(--muted);font:italic 17px/1.7 Georgia;padding:0 10px}
+.treasure-letter{margin:28px 0;border:1px solid var(--gold2);background:linear-gradient(135deg,rgba(87,30,48,.45),rgba(24,12,17,.85))}
+.treasure-letter summary{padding:24px;cursor:pointer;list-style:none;font:23px Georgia}
+.treasure-letter summary span{color:var(--gold);margin-right:12px}
+.treasure-letter summary small{display:block;margin:12px 0 0 37px;font:8px system-ui;letter-spacing:.2em;color:var(--gold)}
+.treasure-letter>div{border-top:1px solid var(--line);padding:12px 26px 25px;font:17px/1.9 Georgia;color:var(--muted)}
+.letter-signature{font-style:italic;color:var(--gold)}
+.treasure-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:25px 0 14px}
+.treasure-heading h3{font-size:21px}.treasure-heading button{font-size:8px;padding:11px}
+#treasure-form{border:1px solid var(--line);padding:20px;margin-bottom:18px;background:rgba(22,12,16,.7)}
+#treasure-form[hidden]{display:none}
+#treasure-form label{display:block;color:var(--muted);font:14px Georgia;margin-bottom:15px}
+#treasure-form input,#treasure-form textarea{display:block;width:100%;margin-top:8px;border:1px solid var(--line);background:#1b1016;color:var(--cream);padding:12px;font:14px/1.5 Georgia}
+.memory-local{font-size:11px;line-height:1.6;color:#a09287}
+.memory-actions{display:flex;gap:8px;flex-wrap:wrap}
+#memory-error{font-size:12px;line-height:1.6;color:var(--gold)}
+.treasure-collection{display:grid;gap:14px;margin:15px 0 28px}
+.treasure-empty{border:1px dashed var(--line);padding:35px 20px;text-align:center;font:italic 16px/1.8 Georgia;color:var(--muted)}
+.memory-card{border:1px solid var(--line);background:rgba(35,17,25,.55);overflow:hidden}
+.memory-card img{display:block;width:100%;max-height:420px;object-fit:cover}
+.memory-card h3{font:21px Georgia;margin:20px 20px 10px}
+.memory-card p{font:15px/1.8 Georgia;color:var(--muted);margin:0 20px 20px;white-space:pre-wrap;overflow-wrap:anywhere}
+@media(prefers-reduced-motion:reduce){.breath-orb{transition:none;transform:none!important}.retreat-light{transition:none}}
 /* Dedicated fitted wardrobe: immutable 190×425 Joy base; no legacy pseudo-body. */
 .joy-fitted-layers{position:absolute;inset:0;width:190px;height:425px;pointer-events:none;z-index:4}
 .joy-worn{position:absolute;inset:0;width:190px;height:425px;overflow:visible;pointer-events:none}

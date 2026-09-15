@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="preload" as="image" href="assets/joy-estate.jpg">
-  <link rel="stylesheet" href="styles.css?v=27">
+  <link rel="stylesheet" href="styles.css?v=28">
   <title>Joy's World</title>
 </head>
 <body>
@@ -51,9 +51,9 @@
       </div>
       <div class="quick-grid">
         <button class="quick" data-room="wardrobe"><span>01</span><b>Wardrobe</b><small>Curate the day</small></button>
-        <button class="quick js-attendant" data-action="calendar"><span>02</span><b>Engagements</b><small>Hold the room</small></button>
+        <button class="quick" data-room="retreat"><span>02</span><b>The Retreat</b><small>A moment just for you</small></button>
         <button class="quick" data-room="money"><span>03</span><b>Money Machine</b><small>Wake Sven</small></button>
-        <button class="quick js-attendant" data-action="vault"><span>04</span><b>Private Vault</b><small>Protected</small></button>
+        <button class="quick" data-room="treasure"><span>04</span><b>The Treasure Room</b><small>Little things, kept close</small></button>
       </div>
     </section>
 
@@ -103,6 +103,35 @@
           <p class="eyebrow">JOY’S SAVED EDIT</p>
           <div id="saved-looks"></div>
         </div>
+      </div>
+    </section>
+
+    <section class="room retreat-room" id="retreat" aria-labelledby="retreat-title">
+      <div class="retreat-shell">
+        <p class="eyebrow">02 · YOUR QUIET SANCTUARY</p>
+        <h2 id="retreat-title">The Retreat</h2>
+        <p class="lede">Nothing to finish. Nowhere to rush. This moment is yours.</p>
+        <div class="retreat-scene" data-mood="candlelight">
+          <img src="assets/joy-retreat.webp" alt="A candlelit burgundy velvet salon with ivory arches overlooking a moonlit lake" loading="lazy">
+          <div class="retreat-light" aria-hidden="true"></div>
+          <div class="retreat-scene-copy"><small>WELCOME HOME, JOY</small><p id="retreat-whisper">Let the day soften around you.</p></div>
+        </div>
+        <div class="retreat-moods" role="group" aria-label="Retreat atmosphere">
+          <button data-mood="candlelight" aria-pressed="true">Candlelight</button><button data-mood="moonlight" aria-pressed="false">Moonlight</button><button data-mood="warmth" aria-pressed="false">A little warmth</button>
+        </div>
+        <div class="retreat-moment"><p class="eyebrow">IF YOU FEEL LIKE IT</p><h3>A softer breath</h3><p>No timer to beat. Just a little space.</p><div class="breath-orb" aria-hidden="true"></div><p id="breath-caption" aria-live="polite">Stay as long as you like.</p><button id="breath-toggle" aria-pressed="false">BEGIN A QUIET MOMENT</button></div>
+        <button class="retreat-note" id="retreat-note">A little kindness, please <span>✧</span></button><p class="retreat-kindness" id="retreat-kindness" aria-live="polite">You do not have to earn your rest.</p>
+        <button class="text-action" data-room="salon">BACK TO THE SALON →</button>
+      </div>
+    </section>
+
+    <section class="room treasure-room" id="treasure" aria-labelledby="treasure-title">
+      <div class="treasure-shell"><p class="eyebrow">04 · LITTLE THINGS, KEPT CLOSE</p><h2 id="treasure-title">The Treasure Room</h2><p class="lede">Words to return to. Beautiful moments to keep.</p>
+        <details class="treasure-letter"><summary><span>✧</span> A note for Joy <small>OPEN YOUR LETTER</small></summary><div><p>Joy, this little world is yours.</p><p>May it be a place where you can exhale, feel beautiful and simply be yourself.</p><p class="letter-signature">With a little warmth, always.</p></div></details>
+        <div class="treasure-heading"><h3>Your little collection</h3><button id="treasure-add" aria-expanded="false">+ KEEP A MOMENT</button></div>
+        <form id="treasure-form" hidden><label>A little title<input id="memory-title" maxlength="100" required placeholder="A beautiful afternoon…"></label><label>Words to keep<textarea id="memory-words" maxlength="2000" rows="3" placeholder="What made this moment special?"></textarea></label><label>A photograph, if you like<input id="memory-photo" type="file" accept="image/jpeg,image/png,image/webp"></label><p class="memory-local">Stored only in this browser on this device. Not uploaded or synced; clearing browser data removes your collection. Keep original photos separately.</p><div class="memory-actions"><button type="submit">KEEP THIS MOMENT</button><button type="button" id="treasure-cancel">NOT NOW</button></div><p id="memory-error" role="status"></p></form>
+        <div id="treasure-collection" class="treasure-collection" aria-live="polite"><p class="treasure-empty">A little space for your favourite moments.<br>No checklist. Just things that make you smile.</p></div>
+        <button class="text-action" data-room="salon">BACK TO THE SALON →</button>
       </div>
     </section>
 
@@ -207,6 +236,6 @@
 
   <div class="toast" id="toast" role="status"></div>
   <audio id="house-jazz" src="assets/joy-house-jazz.mp3" preload="metadata" loop></audio>
-  <script src="app.js?v=26"></script>
+  <script src="app.js?v=28"></script>
 </body>
 </html>
