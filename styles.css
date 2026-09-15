@@ -94,28 +94,66 @@
 .fabric-swatch>span{display:block;width:24px;height:24px;border-radius:50%;background:linear-gradient(120deg,rgba(255,255,255,.1),transparent 55%,rgba(0,0,0,.15)),var(--fabric-color);box-shadow:inset 0 0 0 1px rgba(230,205,169,.18)}
 .fabric-swatch[aria-pressed=true]{border-color:var(--gold);box-shadow:0 0 0 1px rgba(140,104,43,.3)}
 .fabric-swatch:focus-visible{outline:2px solid var(--cream);outline-offset:2px}
-/* Rooms 02 / 04: quiet wellbeing, not appointments or obligations. */
+/* Chamber / Treasure: personal spaces, not appointments or obligations. */
 .retreat-shell,.treasure-shell{max-width:720px;margin:auto}
-.retreat-scene{position:relative;height:clamp(360px,110vw,650px);margin:25px 0 10px;overflow:hidden;border:1px solid var(--line);background:#201119}
-.retreat-scene>img{width:100%;height:100%;object-fit:cover;display:block}
-.retreat-light{position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,8,12,.02),transparent 55%,rgba(18,8,12,.75));transition:background 1.2s ease}
-.retreat-scene[data-mood=moonlight] .retreat-light{background:linear-gradient(180deg,rgba(29,36,63,.24),rgba(14,13,30,.12) 55%,rgba(18,8,12,.8))}
-.retreat-scene[data-mood=warmth] .retreat-light{background:linear-gradient(180deg,rgba(168,110,48,.13),rgba(128,59,32,.13) 55%,rgba(18,8,12,.75))}
-.retreat-scene-copy{position:absolute;bottom:24px;left:24px;right:24px;color:var(--cream)}
-.retreat-scene-copy small{font-size:8px;letter-spacing:.24em;color:var(--gold)}
-.retreat-scene-copy p{font:italic 23px/1.4 Georgia;margin:10px 0 0;max-width:330px}
-.retreat-moods{display:flex;gap:6px;flex-wrap:wrap}
-.retreat-moods button{flex:1;min-width:90px;border:1px solid var(--line);background:rgba(18,9,13,.55);color:var(--muted);padding:12px 8px;font:12px Georgia}
-.retreat-moods button[aria-pressed=true]{border-color:var(--gold2);color:var(--gold);background:rgba(89,30,48,.25)}
-.retreat-moment{margin:24px 0;padding:25px 18px;text-align:center;border:1px solid var(--line);background:radial-gradient(ellipse at center,rgba(118,68,73,.12),transparent 70%)}
-.retreat-moment h3,.treasure-heading h3{font:25px Georgia;font-weight:400;margin:10px 0}
-.retreat-moment>p:not(.eyebrow){font:14px/1.5 Georgia;color:var(--muted)}
-.breath-orb{width:70px;height:70px;border-radius:50%;margin:28px auto;border:1px solid var(--gold2);background:radial-gradient(circle,rgba(217,184,117,.06),transparent);box-shadow:inset 0 0 0 7px rgba(218,187,119,.025);transition:transform 6s ease-in-out,opacity 6s ease-in-out;opacity:.6}
-.breath-in .breath-orb{transform:scale(1.25);opacity:1;transition-duration:4s}
-.retreat-moment button,.memory-actions button,.treasure-heading button{border:1px solid var(--gold2);background:rgba(48,18,29,.65);color:var(--gold);padding:13px 16px;font-size:9px;letter-spacing:.1em}
-.retreat-note{display:flex;justify-content:space-between;align-items:center;width:100%;padding:18px;border:1px solid var(--line);background:rgba(42,18,28,.6);color:var(--cream);font:16px Georgia}
-.retreat-note span{color:var(--gold);font-size:23px}
-.retreat-kindness{text-align:center;min-height:64px;color:var(--muted);font:italic 17px/1.7 Georgia;padding:0 10px}
+.treasure-heading h3{font:25px Georgia;font-weight:400;margin:10px 0}
+.memory-actions button,.treasure-heading button{border:1px solid var(--gold2);background:rgba(48,18,29,.65);color:var(--gold);padding:13px 16px;font-size:9px;letter-spacing:.1em}
+.chamber-scene{position:relative;aspect-ratio:3/4;isolation:isolate;background:#160e12;overflow:hidden;border:1px solid var(--line)}
+.chamber-space{position:absolute;inset:0;transform-origin:50% 32%;transition:transform 1.8s cubic-bezier(.22,.61,.36,1)}
+.chamber-art{width:100%;height:100%;display:block;object-fit:fill}
+.chamber-space:before,.chamber-space:after{content:"";position:absolute;inset:0;z-index:1;background:url('assets/joy-chamber.webp') center/100% 100%;clip-path:polygon(0 0,2.5% 0,3% 54%,0 57%);animation:curtainWhisper 23s ease-in-out infinite alternate;pointer-events:none}
+.chamber-space:after{clip-path:polygon(97.5% 0,100% 0,100% 57%,97% 54%);animation-delay:-11s}
+.chamber-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,6,9,.55),transparent 24%,transparent 75%,rgba(12,6,9,.84));transition:background 1.5s}
+.chamber-heading{position:absolute;z-index:3;top:3%;left:4%;right:4%;text-align:center;pointer-events:none;text-shadow:0 2px 12px #090509;transition:opacity .8s}
+.chamber-heading>p:first-child{font:8px system-ui;letter-spacing:.24em;color:#cfb77f;margin:0 0 8px}
+.chamber-heading h2{font:clamp(23px,4.6vw,42px)/1.1 Georgia;letter-spacing:.13em;font-weight:400;margin:0}
+.chamber-heading .chamber-line{font:italic clamp(14px,2.4vw,21px) Georgia;color:#e3d8c8;margin:9px 0}
+.chamber-actions{position:absolute;z-index:4;bottom:5%;left:6%;right:6%;display:flex;align-items:center;justify-content:center;gap:24px;transition:opacity .6s}
+.chamber-actions button,.vision-input button{color:#ddc48c;border:0;background:transparent;font:9px system-ui;letter-spacing:.16em;padding:14px 2px;cursor:pointer}
+.chamber-actions button:first-child{border-bottom:1px solid #af8e51}
+.chamber-actions button:disabled{cursor:default}
+.chamber-ring{position:absolute;left:23.5%;top:11%;width:53%;aspect-ratio:1;border-radius:50%;box-shadow:inset 0 0 8px rgba(216,175,99,.05);transition:box-shadow 1.5s;pointer-events:none}
+.chamber-ring:after{content:"";position:absolute;inset:-1px;border-radius:50%;border:1px solid transparent;border-top-color:rgba(241,209,141,.42);mask-image:linear-gradient(90deg,transparent 35%,#000 50%,transparent 65%);animation:brassPass 34s linear infinite;opacity:.3}
+.chamber-dream{position:absolute;left:25%;top:12%;width:50%;aspect-ratio:1;border-radius:50%;opacity:.08;background:radial-gradient(ellipse at 64% 30%,rgba(211,191,145,.4),transparent 42%);mix-blend-mode:screen;transition:opacity 2s,background 2s;animation:dreamDrift 29s ease-in-out infinite alternate;pointer-events:none}
+.chamber-dream[data-dream=architecture]{background:linear-gradient(90deg,transparent 23%,rgba(204,184,145,.25) 24% 26%,transparent 27% 35%,rgba(204,184,145,.15) 36% 40%,transparent 41%),radial-gradient(ellipse at 50% 70%,rgba(231,201,143,.3),transparent 60%)}
+.chamber-dream[data-dream=landscape]{background:radial-gradient(ellipse at 36% 60%,rgba(167,196,185,.3),transparent 45%),linear-gradient(175deg,transparent 65%,rgba(206,192,157,.22) 66%,transparent 76%)}
+.chamber-dream[data-dream=warmth]{background:radial-gradient(ellipse at 50% 64%,rgba(235,187,117,.5),transparent 62%),radial-gradient(ellipse at 70% 23%,rgba(210,163,139,.3),transparent 35%)}
+.remembered .chamber-dream{opacity:.24}
+.chamber-water{position:absolute;left:2%;top:60.4%;width:96%;height:17.2%;border-radius:50%;overflow:hidden;pointer-events:none;mix-blend-mode:screen}
+.chamber-water:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 53% 46%,rgba(213,192,148,.1),transparent 54%);animation:reflectionDrift 21s ease-in-out infinite alternate}
+.chamber-water i{position:absolute;inset:0;background:radial-gradient(ellipse,rgba(240,218,158,.3),transparent 70%);opacity:0}
+#chamber-canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.chamber-scene:not([data-state=idle]) .chamber-space{transform:scale(1.015)}
+.chamber-scene:not([data-state=idle]) .chamber-veil{background:linear-gradient(180deg,rgba(12,6,9,.62),rgba(10,5,8,.13) 24%,rgba(10,5,8,.13) 75%,rgba(12,6,9,.86))}
+.chamber-scene:not([data-state=idle]) .chamber-ring{box-shadow:inset 0 0 11px rgba(220,179,105,.15),0 0 8px rgba(220,179,105,.12)}
+.chamber-scene:not([data-state=idle]) .chamber-actions{opacity:0;pointer-events:none}
+.chamber-scene:not([data-state=idle]) .chamber-heading{opacity:.35}
+.vision-input{position:absolute;z-index:5;left:8%;right:8%;top:54%;text-align:center}
+.vision-input[hidden],.vision-collection[hidden]{display:none}
+.vision-input label{display:block;font:8px/1.7 system-ui;letter-spacing:.17em;color:#e3cfa4;text-shadow:0 2px 9px #0b0508}
+.vision-input input{display:block;width:100%;margin:14px 0 7px;padding:12px 4px;border:0;border-bottom:1px solid rgba(218,189,131,.7);border-radius:0;background:rgba(13,8,12,.25);color:#f0e5d3;font:italic 20px Georgia;text-align:center;outline-offset:4px}
+.vision-input input::placeholder{color:#b7a797;font-size:16px}
+.vision-input>div{display:flex;justify-content:center;gap:26px}
+.vision-input button{font-size:8px}
+.vision-sentence{position:absolute;z-index:4;left:7%;right:7%;top:56%;text-align:center;font:italic clamp(17px,3vw,26px)/1.5 Georgia;color:#eee0c4;overflow-wrap:anywhere;text-shadow:0 2px 13px #0c0609;pointer-events:none}
+.vision-sentence span{display:inline-block;white-space:pre;transition:color .8s}
+[data-state=planting] .vision-sentence span{animation:letterToWater 2.8s var(--delay) cubic-bezier(.3,0,.4,1) forwards;color:#d8b976}
+[data-state=planting] .chamber-water i:first-child{animation:waterAnswer 3.6s ease-in-out forwards}
+[data-state=planted] .chamber-dream{opacity:.4}
+.chamber-status{position:absolute;z-index:4;left:7%;right:7%;bottom:13%;text-align:center;font:9px/1.7 system-ui;letter-spacing:.17em;color:#e1c895;pointer-events:none;overflow-wrap:anywhere}
+.chamber-local{font:10px/1.7 system-ui;color:#9d8c7e;margin:14px 2px 20px}
+.vision-collection{padding:16px 0;border-top:1px solid var(--line);margin-top:20px}
+.vision-collection>p{font:italic 17px Georgia;color:var(--muted);padding:14px}
+.vision-entry{display:flex;gap:15px;align-items:center;border-bottom:1px solid var(--line);padding:16px 0}
+.vision-recall{flex:1;text-align:left;color:var(--cream);font:17px/1.6 Georgia;border:0;background:none;overflow-wrap:anywhere}
+.vision-lived{color:var(--gold);background:none;border:1px solid var(--line);padding:12px 8px;font:8px system-ui;letter-spacing:.12em}
+.vision-lived:disabled{border-color:transparent;opacity:.75}
+@keyframes brassPass{to{transform:rotate(360deg)}}
+@keyframes dreamDrift{to{transform:translate3d(.8%,.3%,0)}}
+@keyframes curtainWhisper{to{transform:translate3d(.12%,.06%,0)}}
+@keyframes reflectionDrift{to{transform:translate3d(-1.8%,1%,0);opacity:.5}}
+@keyframes letterToWater{0%{opacity:1;transform:translate(0,0);filter:blur(0)}45%{opacity:.35;transform:translate(var(--drift),15px);filter:blur(1px)}100%{opacity:0;transform:translate(0,52px) scale(.1);filter:blur(2px)}}
+@keyframes waterAnswer{0%,70%,100%{opacity:0}87%{opacity:.33}}
 .treasure-letter{margin:28px 0;border:1px solid var(--gold2);background:linear-gradient(135deg,rgba(87,30,48,.45),rgba(24,12,17,.85))}
 .treasure-letter summary{padding:24px;cursor:pointer;list-style:none;font:23px Georgia}
 .treasure-letter summary span{color:var(--gold);margin-right:12px}
@@ -137,7 +175,7 @@
 .memory-card img{display:block;width:100%;max-height:420px;object-fit:cover}
 .memory-card h3{font:21px Georgia;margin:20px 20px 10px}
 .memory-card p{font:15px/1.8 Georgia;color:var(--muted);margin:0 20px 20px;white-space:pre-wrap;overflow-wrap:anywhere}
-@media(prefers-reduced-motion:reduce){.breath-orb{transition:none;transform:none!important}.retreat-light{transition:none}}
+@media(prefers-reduced-motion:reduce){.chamber-space,.chamber-dream,.chamber-ring,.chamber-heading,.chamber-actions{transition:none;transform:none!important}.chamber-space:before,.chamber-space:after,.chamber-dream,.chamber-ring:after,.chamber-water:before,.vision-sentence span,.chamber-water i{animation:none!important}[data-state=planting] .vision-sentence{opacity:.2}}
 /* Dedicated fitted wardrobe: immutable 190×425 Joy base; no legacy pseudo-body. */
 .joy-fitted-layers{position:absolute;inset:0;width:190px;height:425px;pointer-events:none;z-index:4}
 .joy-worn{position:absolute;inset:0;width:190px;height:425px;overflow:visible;pointer-events:none}

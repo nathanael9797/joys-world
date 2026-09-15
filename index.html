@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="preload" as="image" href="assets/joy-estate.jpg">
-  <link rel="stylesheet" href="styles.css?v=29">
+  <link rel="stylesheet" href="styles.css?v=30">
   <title>Joy's World</title>
 </head>
 <body>
@@ -51,7 +51,7 @@
       </div>
       <div class="quick-grid">
         <button class="quick" data-room="wardrobe"><span>01</span><b>Wardrobe</b><small>Curate the day</small></button>
-        <button class="quick" data-room="retreat"><span>02</span><b>The Retreat</b><small>A moment just for you</small></button>
+        <button class="quick" data-room="retreat"><span>02</span><b>The Chamber</b><small>Give your future a shape</small></button>
         <button class="quick" data-room="money"><span>03</span><b>Money Machine</b><small>Wake Sven</small></button>
         <button class="quick" data-room="treasure"><span>04</span><b>The Treasure Room</b><small>Little things, kept close</small></button>
       </div>
@@ -108,19 +108,27 @@
 
     <section class="room retreat-room" id="retreat" aria-labelledby="retreat-title">
       <div class="retreat-shell">
-        <p class="eyebrow">02 · YOUR QUIET SANCTUARY</p>
-        <h2 id="retreat-title">The Retreat</h2>
-        <p class="lede">Nothing to finish. Nowhere to rush. This moment is yours.</p>
-        <div class="retreat-scene" data-mood="candlelight">
-          <img src="assets/joy-retreat.webp" alt="A candlelit burgundy velvet salon with ivory arches overlooking a moonlit lake" loading="lazy">
-          <div class="retreat-light" aria-hidden="true"></div>
-          <div class="retreat-scene-copy"><small>WELCOME HOME, JOY</small><p id="retreat-whisper">Let the day soften around you.</p></div>
+        <div class="chamber-scene" data-state="idle">
+          <div class="chamber-space">
+            <img class="chamber-art" src="assets/joy-chamber.webp" alt="A monumental aged-brass manifestation mirror in an ivory palazzo, above a black reflective water basin" loading="lazy">
+            <div class="chamber-dream" data-dream="light" aria-hidden="true"></div>
+            <div class="chamber-ring" aria-hidden="true"></div>
+            <div class="chamber-water" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="chamber-veil" aria-hidden="true"></div>
+            <canvas id="chamber-canvas" aria-hidden="true"></canvas>
+          </div>
+          <header class="chamber-heading"><p>PRIVATE MANIFESTATION ROOM</p><h2 id="retreat-title">THE CHAMBER</h2><p class="chamber-line">Give your future a shape.</p></header>
+          <div id="vision-sentence" class="vision-sentence" aria-hidden="true"></div>
+          <form id="vision-form" class="vision-input" hidden>
+            <label for="vision-intention">WHAT ARE YOU CALLING INTO YOUR LIFE?</label>
+            <input id="vision-intention" maxlength="140" required autocomplete="off" placeholder="A future that feels like me…">
+            <div><button type="submit">PLANT THIS VISION</button><button type="button" id="vision-cancel">RETURN</button></div>
+          </form>
+          <p id="chamber-status" class="chamber-status" role="status" aria-live="polite"></p>
+          <div class="chamber-actions"><button id="vision-create">CREATE A VISION</button><button id="vision-library" aria-expanded="false" aria-controls="vision-collection">MY VISIONS</button></div>
         </div>
-        <div class="retreat-moods" role="group" aria-label="Retreat atmosphere">
-          <button data-mood="candlelight" aria-pressed="true">Candlelight</button><button data-mood="moonlight" aria-pressed="false">Moonlight</button><button data-mood="warmth" aria-pressed="false">A little warmth</button>
-        </div>
-        <div class="retreat-moment"><p class="eyebrow">IF YOU FEEL LIKE IT</p><h3>A softer breath</h3><p>No timer to beat. Just a little space.</p><div class="breath-orb" aria-hidden="true"></div><p id="breath-caption" aria-live="polite">Stay as long as you like.</p><button id="breath-toggle" aria-pressed="false">BEGIN A QUIET MOMENT</button></div>
-        <button class="retreat-note" id="retreat-note">A little kindness, please <span>✧</span></button><p class="retreat-kindness" id="retreat-kindness" aria-live="polite">You do not have to earn your rest.</p>
+        <div id="vision-collection" class="vision-collection" hidden></div>
+        <p class="chamber-local">Your visions stay in this browser, on this device. Clearing browser data removes them. A private space for intention and imagination.</p>
         <button class="text-action" data-room="salon">BACK TO THE SALON →</button>
       </div>
     </section>
@@ -236,6 +244,6 @@
 
   <div class="toast" id="toast" role="status"></div>
   <audio id="house-jazz" src="assets/joy-house-jazz.mp3" preload="metadata" loop></audio>
-  <script src="app.js?v=28"></script>
+  <script src="app.js?v=30"></script>
 </body>
 </html>

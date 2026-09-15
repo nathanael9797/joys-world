@@ -89,12 +89,12 @@ let actionCount=0;
 
 const portal=document.getElementById('room-portal');
 const portalName=document.getElementById('portal-name');
-const roomNames={salon:'The Private Salon',wardrobe:'Joy’s Wardrobe',money:'The Money Room',retreat:'The Retreat',treasure:'The Treasure Room'};
+const roomNames={salon:'The Private Salon',wardrobe:'Joy’s Wardrobe',money:'The Money Room',retreat:'The Chamber',treasure:'The Treasure Room'};
 let roomMoving=false;
 async function showRoom(id){
   if(roomMoving||document.getElementById(id)?.classList.contains('active'))return;
   roomMoving=true;
-  if(id!=='retreat')stopQuietMoment();
+  if(id!=='retreat')stopChamber();
   if(!reduceMotion){
     portalName.textContent=roomNames[id]||'Welcome, Madam';
     portal.classList.add('entering');
@@ -428,39 +428,130 @@ wake.addEventListener('click',async()=>{
   wake.disabled=false;
 });
 
-// Retreat: optional, interruption-free atmosphere. Reuse the single house-jazz instance.
-const retreatScene=document.querySelector('.retreat-scene');
-const retreatWhispers={candlelight:'Let the day soften around you.',moonlight:'A quiet sky. A little room to dream.',warmth:'You are allowed to take up this peaceful space.'};
-document.querySelectorAll('.retreat-moods [data-mood]').forEach(button=>button.addEventListener('click',()=>{
-  retreatScene.dataset.mood=button.dataset.mood;
-  document.getElementById('retreat-whisper').textContent=retreatWhispers[button.dataset.mood];
-  document.querySelectorAll('.retreat-moods [data-mood]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
-}));
-let quietTimer=0,quietActive=false;
-const breathToggle=document.getElementById('breath-toggle');
-const breathCaption=document.getElementById('breath-caption');
-function stopQuietMoment(){
-  clearTimeout(quietTimer);quietActive=false;
-  document.querySelector('.retreat-moment')?.classList.remove('breathing','breath-in');
-  breathToggle?.setAttribute('aria-pressed','false');
-  if(breathToggle)breathToggle.textContent='BEGIN A QUIET MOMENT';
-  if(breathCaption)breathCaption.textContent='Stay as long as you like.';
+// The Chamber: one architectural surface, local intentions, no AI/network calls.
+const chamber=document.querySelector('.chamber-scene');
+const visionForm=document.getElementById('vision-form');
+const visionInput=document.getElementById('vision-intention');
+const visionSentence=document.getElementById('vision-sentence');
+const chamberStatus=document.getElementById('chamber-status');
+const visionCreate=document.getElementById('vision-create');
+const visionLibrary=document.getElementById('vision-library');
+const visionCollection=document.getElementById('vision-collection');
+const chamberCanvas=document.getElementById('chamber-canvas');
+const chamberContext=chamberCanvas.getContext('2d');
+const VISION_KEY='joyChamberVisionsV1';
+let visions=[],chamberToken=0,chamberFrame=0,chamberVisible=false,chamberAudio=false;
+let ritualStart=0,lastChamberFrame=0;
+try{const saved=JSON.parse(localStorage.getItem(VISION_KEY)||'[]');if(Array.isArray(saved))visions=saved.filter(v=>v&&typeof v.id==='string'&&typeof v.text==='string').slice(0,80)}catch(error){chamberStatus.textContent='Your device storage is unavailable. Please keep a copy of your vision.'}
+function visionSeed(text){return [...text].reduce((n,c)=>(n*31+c.codePointAt(0))>>>0,7)}
+function dreamFor(text){
+  if(/home|house|apartment|wohnung|haus|business|career|beruf/i.test(text))return 'architecture';
+  if(/travel|sea|lake|reise|meer|world|freiheit|freedom/i.test(text))return 'landscape';
+  if(/love|family|liebe|familie|joy|peace|frieden/i.test(text))return 'warmth';
+  return 'light';
 }
-function quietPhase(inhale){
-  if(!quietActive)return;
-  document.querySelector('.retreat-moment').classList.toggle('breath-in',inhale);
-  breathCaption.textContent=inhale?'A gentle breath in…':'Let it go, slowly…';
-  quietTimer=setTimeout(()=>quietPhase(!inhale),inhale?4000:6000);
+function rememberVisions(next){localStorage.setItem(VISION_KEY,JSON.stringify(next));visions=next;renderVisions()}
+function renderVisions(){
+  visionCollection.replaceChildren();
+  if(!visions.length){const p=document.createElement('p');p.textContent='The mirror is waiting for your first vision.';visionCollection.append(p)}
+  visions.forEach(vision=>{
+    const row=document.createElement('article');row.className='vision-entry';
+    const recall=document.createElement('button');recall.className='vision-recall';recall.textContent=vision.text;
+    recall.addEventListener('click',()=>{chamber.querySelector('.chamber-dream').dataset.dream=dreamFor(vision.text);chamber.classList.add('remembered');chamberStatus.textContent=vision.lived?'LIVED · '+vision.text:vision.text});
+    const lived=document.createElement('button');lived.className='vision-lived';lived.textContent=vision.lived?'LIVED':'MARK LIVED';lived.disabled=!!vision.lived;
+    lived.addEventListener('click',()=>{try{rememberVisions(visions.map(v=>v.id===vision.id?{...v,lived:true}:v));chamberStatus.textContent='LIVED · A light that stays.';drawChamber(performance.now())}catch(error){chamberStatus.textContent='Could not save this change. Your vision is still here.'}});
+    row.append(recall,lived);visionCollection.append(row);
+  });
+  if(visions.length){chamber.classList.add('remembered');chamber.querySelector('.chamber-dream').dataset.dream=dreamFor(visions[visions.length-1].text)}
+  visionLibrary.textContent=visions.length?'MY VISIONS · '+visions.length:'MY VISIONS';
+  drawChamber(performance.now());
 }
-breathToggle.addEventListener('click',()=>{
-  if(quietActive){stopQuietMoment();return;}
-  quietActive=true;breathToggle.setAttribute('aria-pressed','true');breathToggle.textContent='RETURN TO STILLNESS';
-  document.querySelector('.retreat-moment').classList.add('breathing');quietPhase(true);
+function restoreChamberAudio(){
+  if(chamberAudio&&document.hidden)ambienceWasPlaying=true;
+  if(chamberAudio&&!ambienceMuted&&!document.hidden){primeAmbience();fadeAmbience(.065,1800)}
+  chamberAudio=false;
+}
+function stopChamber(){
+  chamberToken++;ritualStart=0;chamber.dataset.state='idle';visionForm.hidden=true;visionSentence.replaceChildren();
+  visionCreate.disabled=false;visionLibrary.disabled=false;restoreChamberAudio();
+}
+async function openVision(){
+  if(chamber.dataset.state!=='idle')return;
+  const token=++chamberToken;chamber.dataset.state='approaching';chamberStatus.textContent='';
+  visionCollection.hidden=true;visionLibrary.setAttribute('aria-expanded','false');visionCreate.disabled=true;visionLibrary.disabled=true;
+  chamberAudio=!houseJazz.paused&&!ambienceMuted;if(chamberAudio)fadeAmbience(0,1000);
+  await wait(reduceMotion?100:1450);if(token!==chamberToken)return;
+  chamber.dataset.state='writing';visionForm.hidden=false;visionInput.focus();
+}
+visionCreate.addEventListener('click',openVision);
+document.getElementById('vision-cancel').addEventListener('click',()=>{stopChamber();visionCreate.focus()});
+visionLibrary.addEventListener('click',()=>{visionCollection.hidden=!visionCollection.hidden;visionLibrary.setAttribute('aria-expanded',String(!visionCollection.hidden));if(!visionCollection.hidden)visionCollection.scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'nearest'})});
+visionForm.addEventListener('submit',async event=>{
+  event.preventDefault();if(chamber.dataset.state!=='writing')return;
+  const text=visionInput.value.trim();if(!text){visionInput.focus();return}
+  if(visions.length>=80){chamberStatus.textContent='This chamber holds 80 visions. Please keep a copy of your next intention.';return}
+  const token=chamberToken;visionForm.hidden=true;chamber.dataset.state='holding';
+  visionSentence.replaceChildren();
+  [...text].forEach((letter,i)=>{const span=document.createElement('span');span.textContent=letter;span.style.setProperty('--delay',(i%19)*25+'ms');span.style.setProperty('--drift',((i%7)-3)*9+'px');visionSentence.append(span)});
+  await wait(reduceMotion?150:1100);if(token!==chamberToken)return;
+  chamber.dataset.state='planting';ritualStart=performance.now();
+  await wait(reduceMotion?200:3600);if(token!==chamberToken)return;
+  try{
+    rememberVisions([...visions,{id:crypto.randomUUID(),text,created:Date.now(),lived:false}]);
+    chamber.dataset.state='planted';chamberStatus.textContent='VISION PLANTED';visionInput.value='';
+  }catch(error){chamber.dataset.state='planted';chamberStatus.textContent='Your vision could not be saved on this device. Please copy it: '+text}
+  ritualStart=0;visionSentence.replaceChildren();restoreChamberAudio();
+  await wait(reduceMotion?200:1800);if(token!==chamberToken)return;
+  chamber.dataset.state='idle';visionCreate.disabled=false;visionLibrary.disabled=false;
 });
-document.addEventListener('visibilitychange',()=>{if(document.hidden)stopQuietMoment()});
-const kindness=['You do not have to earn your rest.','Nothing is required of you in this moment.','Let something small and beautiful be enough.','Your softness belongs here.','There is room for you, exactly as you are.'];
-let kindnessIndex=0;
-document.getElementById('retreat-note').addEventListener('click',()=>{kindnessIndex=(kindnessIndex+1)%kindness.length;document.getElementById('retreat-kindness').textContent=kindness[kindnessIndex]});
+function resizeChamber(){
+  const rect=chamber.getBoundingClientRect();const ratio=Math.min(devicePixelRatio||1,1.5);
+  if(!rect.width)return;chamberCanvas.width=Math.round(rect.width*ratio);chamberCanvas.height=Math.round(rect.height*ratio);drawChamber(performance.now());
+}
+function drawChamber(now){
+  if(!chamberContext)return;
+  const c=chamberContext,w=chamberCanvas.width,h=chamberCanvas.height,t=reduceMotion?0:now/1000;
+  c.clearRect(0,0,w,h);
+  const point=(x,y,r,alpha)=>{c.fillStyle=`rgba(218,186,120,${alpha})`;c.beginPath();c.arc(x*w,y*h,r*w,0,Math.PI*2);c.fill()};
+  // Sparse airborne embers. No full-image displacement or architecture animation.
+  for(let i=0;i<12;i++){const phase=(t/48+i*.137)%1;point(.29+(i%5)*.097+Math.sin(t/13+i)*.008,.74-phase*.33,.0011,.13+Math.sin(phase*Math.PI)*.25)}
+  visions.forEach((v,i)=>{
+    const seed=visionSeed(v.id),angle=(seed%628)/100,r=.025+(seed%140)/1000;
+    const x=.5+Math.cos(angle)*r,y=.32+Math.sin(angle)*r*.75;
+    point(x,y,v.lived?.0025:.0015,v.lived?.95:.45);
+    point(x,.68+(y-.32)*.18,.0014,v.lived?.6:.23);
+    if(i>=3)point(i%2?.92:.075,.28+(i%7)*.038,.0011,v.lived?.7:.3);
+  });
+  if(visions.length>=3){
+    c.strokeStyle='rgba(164,153,102,.65)';c.lineWidth=w*.0015;c.beginPath();c.moveTo(w*.82,h*.8);c.quadraticCurveTo(w*.81,h*.75,w*.84,h*.70);c.stroke();
+    for(let j=0;j<Math.min(visions.length,9);j++){c.fillStyle='rgba(153,148,102,.5)';c.beginPath();c.ellipse(w*(.818+j*.003),h*(.78-j*.009),w*.009,h*.0025,j%2?.5:-.5,0,Math.PI*2);c.fill()}
+  }
+  const active=chamber.dataset.state!=='idle';
+  // All ripples clipped exclusively inside the black basin surface.
+  c.save();c.beginPath();c.ellipse(w*.5,h*.69,w*.47,h*.086,0,0,Math.PI*2);c.clip();
+  for(let i=0;i<3;i++){
+    const p=(t/(active?5:24)+i/3)%1;c.strokeStyle=`rgba(216,187,133,${(1-p)*(active?.16:.035)})`;c.lineWidth=w*.001;
+    c.beginPath();c.ellipse(w*.5,h*.687,w*(.015+p*.40),h*(.004+p*.064),0,0,Math.PI*2);c.stroke();
+  }
+  c.restore();
+  if(ritualStart&&!reduceMotion){
+    const p=Math.min(1,(now-ritualStart)/3600);
+    for(let i=0;i<70;i++){
+      const a=i*2.399+p*5.2,r=(1-p)*(.14+(i%7)*.013);
+      point(.5+Math.cos(a)*r,.60+Math.sin(a)*r*.23+p*.086,.0008+(i%3)*.00025,Math.sin(p*Math.PI)*.7);
+    }
+  }
+}
+function chamberTick(now){
+  if(!chamberVisible||document.hidden){chamberFrame=0;return}
+  if(now-lastChamberFrame>40){drawChamber(now);lastChamberFrame=now}
+  chamberFrame=reduceMotion?0:requestAnimationFrame(chamberTick);
+}
+function startChamberFrame(){if(!chamberFrame&&chamberVisible&&!document.hidden){resizeChamber();if(!reduceMotion)chamberFrame=requestAnimationFrame(chamberTick)}}
+new ResizeObserver(resizeChamber).observe(chamber);
+new IntersectionObserver(entries=>{chamberVisible=entries[0].isIntersecting;if(chamberVisible)startChamberFrame();else{cancelAnimationFrame(chamberFrame);chamberFrame=0}},{threshold:.05}).observe(chamber);
+document.addEventListener('visibilitychange',()=>{if(document.hidden){stopChamber();cancelAnimationFrame(chamberFrame);chamberFrame=0}else startChamberFrame()});
+renderVisions();
 
 // Treasure Room: device-local IndexedDB, never transmit personal photographs.
 let memoryDbPromise,photoUrls=[];
@@ -507,7 +598,7 @@ memoryForm.addEventListener('submit',async event=>{
   }catch(error){memoryError.textContent=error.message||'This moment could not be saved. Please keep your original photo.'}finally{submit.disabled=false}
 });
 renderMemories();
-addEventListener('pagehide',()=>{stopQuietMoment();photoUrls.forEach(URL.revokeObjectURL)});
+addEventListener('pagehide',()=>{stopChamber();cancelAnimationFrame(chamberFrame);chamberFrame=0;photoUrls.forEach(URL.revokeObjectURL)});
 addEventListener('pageshow',event=>{if(event.persisted)renderMemories()});
 
 if('serviceWorker' in navigator){
