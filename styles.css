@@ -119,6 +119,15 @@
 .chamber-dream[data-dream=landscape]{background:radial-gradient(ellipse at 36% 60%,rgba(167,196,185,.3),transparent 45%),linear-gradient(175deg,transparent 65%,rgba(206,192,157,.22) 66%,transparent 76%)}
 .chamber-dream[data-dream=warmth]{background:radial-gradient(ellipse at 50% 64%,rgba(235,187,117,.5),transparent 62%),radial-gradient(ellipse at 70% 23%,rgba(210,163,139,.3),transparent 35%)}
 .remembered .chamber-dream{opacity:.24}
+.chamber-vision{position:absolute;left:25%;top:12%;width:50%;aspect-ratio:1;border-radius:50%;overflow:hidden;opacity:0;transition:opacity 1.8s ease;background:#171116;pointer-events:none;box-shadow:inset 0 0 15px #160d12}
+.chamber-vision.visible{opacity:.94}
+.chamber-vision img{display:block;width:100%;height:100%;object-fit:cover;filter:brightness(.87) saturate(.96);animation:visionDepth 22s ease-in-out infinite alternate;transform:scale(1.35)}
+.chamber-vision[data-visual=custom] img{transform:scale(1.035);animation-name:visionCustomDepth}
+.chamber-vision:after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse,transparent 40%,rgba(20,11,16,.42) 100%),linear-gradient(125deg,rgba(235,219,186,.09),transparent 35%);box-shadow:inset 0 0 18px rgba(15,8,12,.7)}
+.chamber-vision[data-visual=travel]:before{content:"";position:absolute;z-index:1;left:0;right:0;top:47%;bottom:0;background:linear-gradient(173deg,transparent 30%,rgba(234,226,174,.13) 50%,transparent 66%);animation:visionSeaLight 13s ease-in-out infinite alternate;pointer-events:none}
+.chamber-vision-reflection{position:absolute;left:19%;top:60.8%;width:62%;height:16%;border-radius:50%;overflow:hidden;opacity:0;transition:opacity 2.3s ease;pointer-events:none;mask-image:radial-gradient(ellipse,#000 25%,transparent 72%)}
+.chamber-vision-reflection.visible{opacity:.18}
+.chamber-vision-reflection img{width:100%;height:100%;object-fit:cover;transform:scaleY(-1);filter:brightness(.75) blur(.5px);animation:visionReflection 19s ease-in-out infinite alternate}
 .chamber-water{position:absolute;left:2%;top:60.4%;width:96%;height:17.2%;border-radius:50%;overflow:hidden;pointer-events:none;mix-blend-mode:screen}
 .chamber-water:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 53% 46%,rgba(213,192,148,.1),transparent 54%);animation:reflectionDrift 21s ease-in-out infinite alternate}
 .chamber-water i{position:absolute;inset:0;background:radial-gradient(ellipse,rgba(240,218,158,.3),transparent 70%);opacity:0}
@@ -128,13 +137,25 @@
 .chamber-scene:not([data-state=idle]) .chamber-ring{box-shadow:inset 0 0 11px rgba(220,179,105,.15),0 0 8px rgba(220,179,105,.12)}
 .chamber-scene:not([data-state=idle]) .chamber-actions{opacity:0;pointer-events:none}
 .chamber-scene:not([data-state=idle]) .chamber-heading{opacity:.35}
-.vision-input{position:absolute;z-index:5;left:8%;right:8%;top:54%;text-align:center}
+.vision-input{position:absolute;z-index:5;left:8%;right:8%;top:49%;text-align:center}
 .vision-input[hidden],.vision-collection[hidden]{display:none}
 .vision-input label{display:block;font:8px/1.7 system-ui;letter-spacing:.17em;color:#e3cfa4;text-shadow:0 2px 9px #0b0508}
 .vision-input input{display:block;width:100%;margin:14px 0 7px;padding:12px 4px;border:0;border-bottom:1px solid rgba(218,189,131,.7);border-radius:0;background:rgba(13,8,12,.25);color:#f0e5d3;font:italic 20px Georgia;text-align:center;outline-offset:4px}
 .vision-input input::placeholder{color:#b7a797;font-size:16px}
 .vision-input>div{display:flex;justify-content:center;gap:26px}
 .vision-input button{font-size:8px}
+.vision-input .vision-image-tools{align-items:center;justify-content:center;gap:12px;margin-top:11px;flex-wrap:wrap}
+.vision-image-tools .vision-scene-label{font-size:7px;letter-spacing:.12em;text-align:left}
+.vision-scene-label select{display:block;max-width:145px;border:0;border-bottom:1px solid var(--gold2);background:#1b1118;color:#e3d2b1;font:11px Georgia;padding:8px 3px;margin-top:3px}
+.vision-image-tools .vision-photo-label{position:relative;font-size:8px;letter-spacing:.1em;cursor:pointer;border-bottom:1px solid var(--gold2);padding:8px 0}
+.vision-photo-label span{display:block;font:6px/1.6 system-ui;color:#b9aa97;letter-spacing:.08em;margin-top:4px}
+.vision-photo-label input[type=file]{position:absolute;width:1px;height:1px;padding:0;margin:0;opacity:0;overflow:hidden;clip-path:inset(50%)}
+.vision-photo-label:focus-within{outline:1px solid var(--gold);outline-offset:4px}
+.vision-input #vision-photo-clear{font-size:7px;padding:4px}
+#vision-photo-status{font:9px/1.5 Georgia;color:#d9c598;margin:7px 0 0;min-height:0}
+#vision-photo-status:empty{display:none}
+.vision-input #vision-photo-clear[hidden]{display:none}
+.chamber-scene[data-state=writing] .chamber-status{opacity:0}
 .vision-sentence{position:absolute;z-index:4;left:7%;right:7%;top:56%;text-align:center;font:italic clamp(17px,3vw,26px)/1.5 Georgia;color:#eee0c4;overflow-wrap:anywhere;text-shadow:0 2px 13px #0c0609;pointer-events:none}
 .vision-sentence span{display:inline-block;white-space:pre;transition:color .8s}
 [data-state=planting] .vision-sentence span{animation:letterToWater 2.8s var(--delay) cubic-bezier(.3,0,.4,1) forwards;color:#d8b976}
@@ -145,7 +166,9 @@
 .vision-collection{padding:16px 0;border-top:1px solid var(--line);margin-top:20px}
 .vision-collection>p{font:italic 17px Georgia;color:var(--muted);padding:14px}
 .vision-entry{display:flex;gap:15px;align-items:center;border-bottom:1px solid var(--line);padding:16px 0}
-.vision-recall{flex:1;text-align:left;color:var(--cream);font:17px/1.6 Georgia;border:0;background:none;overflow-wrap:anywhere}
+.vision-recall{flex:1;display:flex;gap:12px;align-items:center;min-width:0;text-align:left;color:var(--cream);font:17px/1.6 Georgia;border:0;background:none;overflow-wrap:anywhere}
+.vision-recall img{width:52px;height:52px;object-fit:cover;border:1px solid var(--line);border-radius:50%;flex-shrink:0}
+.vision-recall span{min-width:0;overflow-wrap:anywhere}
 .vision-lived{color:var(--gold);background:none;border:1px solid var(--line);padding:12px 8px;font:8px system-ui;letter-spacing:.12em}
 .vision-lived:disabled{border-color:transparent;opacity:.75}
 @keyframes brassPass{to{transform:rotate(360deg)}}
@@ -154,6 +177,10 @@
 @keyframes reflectionDrift{to{transform:translate3d(-1.8%,1%,0);opacity:.5}}
 @keyframes letterToWater{0%{opacity:1;transform:translate(0,0);filter:blur(0)}45%{opacity:.35;transform:translate(var(--drift),15px);filter:blur(1px)}100%{opacity:0;transform:translate(0,52px) scale(.1);filter:blur(2px)}}
 @keyframes waterAnswer{0%,70%,100%{opacity:0}87%{opacity:.33}}
+@keyframes visionDepth{to{transform:scale(1.38) translate3d(-.7%,.4%,0)}}
+@keyframes visionCustomDepth{to{transform:scale(1.06) translate3d(-.7%,.4%,0)}}
+@keyframes visionSeaLight{to{transform:translate3d(5%,1%,0);opacity:.45}}
+@keyframes visionReflection{to{transform:scaleY(-1) translate3d(.6%,1.5%,0);opacity:.65}}
 .treasure-letter{margin:28px 0;border:1px solid var(--gold2);background:linear-gradient(135deg,rgba(87,30,48,.45),rgba(24,12,17,.85))}
 .treasure-letter summary{padding:24px;cursor:pointer;list-style:none;font:23px Georgia}
 .treasure-letter summary span{color:var(--gold);margin-right:12px}
@@ -176,6 +203,7 @@
 .memory-card h3{font:21px Georgia;margin:20px 20px 10px}
 .memory-card p{font:15px/1.8 Georgia;color:var(--muted);margin:0 20px 20px;white-space:pre-wrap;overflow-wrap:anywhere}
 @media(prefers-reduced-motion:reduce){.chamber-space,.chamber-dream,.chamber-ring,.chamber-heading,.chamber-actions{transition:none;transform:none!important}.chamber-space:before,.chamber-space:after,.chamber-dream,.chamber-ring:after,.chamber-water:before,.vision-sentence span,.chamber-water i{animation:none!important}[data-state=planting] .vision-sentence{opacity:.2}}
+@media(prefers-reduced-motion:reduce){.chamber-vision,.chamber-vision-reflection{transition:none}.chamber-vision img,.chamber-vision:before,.chamber-vision-reflection img{animation:none!important}}
 /* Dedicated fitted wardrobe: immutable 190×425 Joy base; no legacy pseudo-body. */
 .joy-fitted-layers{position:absolute;inset:0;width:190px;height:425px;pointer-events:none;z-index:4}
 .joy-worn{position:absolute;inset:0;width:190px;height:425px;overflow:visible;pointer-events:none}

@@ -442,6 +442,76 @@ const chamberContext=chamberCanvas.getContext('2d');
 const VISION_KEY='joyChamberVisionsV1';
 let visions=[],chamberToken=0,chamberFrame=0,chamberVisible=false,chamberAudio=false;
 let ritualStart=0,lastChamberFrame=0;
+const visionPhoto=document.getElementById('vision-photo');
+const visionPhotoStatus=document.getElementById('vision-photo-status');
+const visionPhotoClear=document.getElementById('vision-photo-clear');
+const visionScene=document.getElementById('vision-scene');
+const visionSurface=chamber.querySelector('.chamber-vision');
+const visionReflection=chamber.querySelector('.chamber-vision-reflection');
+const visionSceneAssets={home:'assets/vision-home.webp',travel:'assets/vision-travel.webp',car:'assets/vision-car.webp'};
+let visionImageDbPromise,visionImageToken=0,photoReadToken=0,preparedVisionPhoto=null,preparingPhoto=false,activeVisionId=null;
+const visionImageUrls=new Map();
+function visionImageDb(){
+  if(!visionImageDbPromise)visionImageDbPromise=new Promise((resolve,reject)=>{
+    const request=indexedDB.open('joy-chamber-images',1);
+    request.onupgradeneeded=()=>request.result.createObjectStore('images');
+    request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);
+  }).catch(error=>{visionImageDbPromise=null;throw error});
+  return visionImageDbPromise;
+}
+async function visionImageOperation(mode,id,blob){
+  const db=await visionImageDb();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction('images',mode),store=tx.objectStore('images');let result;
+    const request=mode==='readwrite'?store.put(blob,id):store.get(id);
+    request.onsuccess=()=>{result=request.result};tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
+  });
+}
+function sceneFor(text){
+  if(/\b(car|auto|wagen|sedan|ferrari|toyota|mercedes|bmw|porsche)\b/i.test(text))return 'car';
+  if(/home|house|apartment|villa|wohnung|haus|garten/i.test(text))return 'home';
+  if(/travel|coast|beach|holiday|sea|lake|reise|urlaub|meer|strand|cannes/i.test(text))return 'travel';
+  return null;
+}
+async function showVision(vision){
+  activeVisionId=vision.id;const token=++visionImageToken;
+  chamber.querySelector('.chamber-dream').dataset.dream=dreamFor(vision.text);chamber.classList.add('remembered');
+  visionSurface.classList.remove('visible');visionReflection.classList.remove('visible');
+  let source=visionSceneAssets[vision.visual]||visionSceneAssets[sceneFor(vision.text)];
+  try{
+    if(vision.image){
+      if(!visionImageUrls.has(vision.id)){const blob=await visionImageOperation('readonly',vision.id);if(!blob)throw Error('Image unavailable');visionImageUrls.set(vision.id,URL.createObjectURL(blob))}
+      source=visionImageUrls.get(vision.id);
+    }
+    if(token!==visionImageToken||!source)return;
+    const loaded=new Image();loaded.src=source;await loaded.decode();if(token!==visionImageToken)return;
+    visionSurface.querySelector('img').src=source;visionReflection.querySelector('img').src=source;
+    visionSurface.dataset.visual=vision.image?'custom':vision.visual||sceneFor(vision.text)||'light';
+    visionSurface.classList.add('visible');visionReflection.classList.add('visible');
+  }catch(error){if(token===visionImageToken&&vision.image)chamberStatus.textContent='Your vision is here, but its image is unavailable on this device.'}
+}
+async function prepareVisionPhoto(file){
+  if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>8*1024*1024)throw Error('Choose a JPG, PNG or WebP smaller than 8 MB.');
+  const url=URL.createObjectURL(file);
+  try{
+    const img=new Image();img.src=url;await img.decode();
+    const scale=Math.min(1,1024/Math.max(img.naturalWidth,img.naturalHeight));
+    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
+    const context=canvas.getContext('2d');if(!context)throw Error('Image processing is unavailable.');
+    context.fillStyle='#e8dfd2';context.fillRect(0,0,canvas.width,canvas.height);context.drawImage(img,0,0,canvas.width,canvas.height);
+    return await new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(Error('This image could not be prepared.')),'image/jpeg',.83));
+  }finally{URL.revokeObjectURL(url)}
+}
+function clearVisionPhoto(){photoReadToken++;preparedVisionPhoto=null;preparingPhoto=false;visionPhoto.value='';visionPhotoStatus.textContent='';visionPhotoClear.hidden=true;visionForm.querySelector('[type="submit"]').disabled=false}
+visionPhoto.addEventListener('change',async()=>{
+  const file=visionPhoto.files[0];if(!file){clearVisionPhoto();return}
+  const token=++photoReadToken;preparedVisionPhoto=null;preparingPhoto=true;visionPhotoClear.hidden=false;
+  visionForm.querySelector('[type="submit"]').disabled=true;visionPhotoStatus.textContent='Preparing your image, privately on this device…';
+  try{const blob=await prepareVisionPhoto(file);if(token!==photoReadToken)return;preparedVisionPhoto=blob;visionPhotoStatus.textContent='Your image is ready · saved locally, never uploaded.'}
+  catch(error){if(token===photoReadToken){visionPhoto.value='';visionPhotoClear.hidden=true;visionPhotoStatus.textContent=error.message||'This image could not be opened.'}}
+  finally{if(token===photoReadToken){preparingPhoto=false;visionForm.querySelector('[type="submit"]').disabled=false}}
+});
+visionPhotoClear.addEventListener('click',clearVisionPhoto);
 try{const saved=JSON.parse(localStorage.getItem(VISION_KEY)||'[]');if(Array.isArray(saved))visions=saved.filter(v=>v&&typeof v.id==='string'&&typeof v.text==='string').slice(0,80)}catch(error){chamberStatus.textContent='Your device storage is unavailable. Please keep a copy of your vision.'}
 function visionSeed(text){return [...text].reduce((n,c)=>(n*31+c.codePointAt(0))>>>0,7)}
 function dreamFor(text){
@@ -456,13 +526,16 @@ function renderVisions(){
   if(!visions.length){const p=document.createElement('p');p.textContent='The mirror is waiting for your first vision.';visionCollection.append(p)}
   visions.forEach(vision=>{
     const row=document.createElement('article');row.className='vision-entry';
-    const recall=document.createElement('button');recall.className='vision-recall';recall.textContent=vision.text;
-    recall.addEventListener('click',()=>{chamber.querySelector('.chamber-dream').dataset.dream=dreamFor(vision.text);chamber.classList.add('remembered');chamberStatus.textContent=vision.lived?'LIVED · '+vision.text:vision.text});
+    const recall=document.createElement('button');recall.className='vision-recall';
+    const title=document.createElement('span');title.textContent=vision.text;recall.append(title);
+    const sceneSource=visionSceneAssets[vision.visual]||visionSceneAssets[sceneFor(vision.text)];
+    if(sceneSource||vision.image){const thumb=document.createElement('img');thumb.alt='';thumb.loading='lazy';recall.prepend(thumb);if(sceneSource&&!vision.image)thumb.src=sceneSource;else visionImageOperation('readonly',vision.id).then(blob=>{if(!blob)return;if(!visionImageUrls.has(vision.id))visionImageUrls.set(vision.id,URL.createObjectURL(blob));thumb.src=visionImageUrls.get(vision.id)}).catch(()=>thumb.remove())}
+    recall.addEventListener('click',()=>{showVision(vision);chamberStatus.textContent=vision.lived?'LIVED · '+vision.text:vision.text});
     const lived=document.createElement('button');lived.className='vision-lived';lived.textContent=vision.lived?'LIVED':'MARK LIVED';lived.disabled=!!vision.lived;
     lived.addEventListener('click',()=>{try{rememberVisions(visions.map(v=>v.id===vision.id?{...v,lived:true}:v));chamberStatus.textContent='LIVED · A light that stays.';drawChamber(performance.now())}catch(error){chamberStatus.textContent='Could not save this change. Your vision is still here.'}});
     row.append(recall,lived);visionCollection.append(row);
   });
-  if(visions.length){chamber.classList.add('remembered');chamber.querySelector('.chamber-dream').dataset.dream=dreamFor(visions[visions.length-1].text)}
+  if(visions.length)showVision(visions.find(v=>v.id===activeVisionId)||visions[visions.length-1]);
   visionLibrary.textContent=visions.length?'MY VISIONS · '+visions.length:'MY VISIONS';
   drawChamber(performance.now());
 }
@@ -487,18 +560,22 @@ visionCreate.addEventListener('click',openVision);
 document.getElementById('vision-cancel').addEventListener('click',()=>{stopChamber();visionCreate.focus()});
 visionLibrary.addEventListener('click',()=>{visionCollection.hidden=!visionCollection.hidden;visionLibrary.setAttribute('aria-expanded',String(!visionCollection.hidden));if(!visionCollection.hidden)visionCollection.scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'nearest'})});
 visionForm.addEventListener('submit',async event=>{
-  event.preventDefault();if(chamber.dataset.state!=='writing')return;
+  event.preventDefault();if(chamber.dataset.state!=='writing'||preparingPhoto)return;
   const text=visionInput.value.trim();if(!text){visionInput.focus();return}
   if(visions.length>=80){chamberStatus.textContent='This chamber holds 80 visions. Please keep a copy of your next intention.';return}
-  const token=chamberToken;visionForm.hidden=true;chamber.dataset.state='holding';
+  const token=chamberToken,photo=preparedVisionPhoto;
+  const vision={id:crypto.randomUUID(),text,created:Date.now(),lived:false,visual:visionScene.value==='auto'?sceneFor(text):visionScene.value,image:!!photo};
+  visionForm.hidden=true;chamber.dataset.state='holding';
   visionSentence.replaceChildren();
   [...text].forEach((letter,i)=>{const span=document.createElement('span');span.textContent=letter;span.style.setProperty('--delay',(i%19)*25+'ms');span.style.setProperty('--drift',((i%7)-3)*9+'px');visionSentence.append(span)});
   await wait(reduceMotion?150:1100);if(token!==chamberToken)return;
   chamber.dataset.state='planting';ritualStart=performance.now();
   await wait(reduceMotion?200:3600);if(token!==chamberToken)return;
   try{
-    rememberVisions([...visions,{id:crypto.randomUUID(),text,created:Date.now(),lived:false}]);
-    chamber.dataset.state='planted';chamberStatus.textContent='VISION PLANTED';visionInput.value='';
+    if(photo)await visionImageOperation('readwrite',vision.id,photo);
+    if(token!==chamberToken)return;
+    activeVisionId=vision.id;rememberVisions([...visions,vision]);
+    chamber.dataset.state='planted';chamberStatus.textContent='VISION PLANTED';visionInput.value='';visionScene.value='auto';clearVisionPhoto();
   }catch(error){chamber.dataset.state='planted';chamberStatus.textContent='Your vision could not be saved on this device. Please copy it: '+text}
   ritualStart=0;visionSentence.replaceChildren();restoreChamberAudio();
   await wait(reduceMotion?200:1800);if(token!==chamberToken)return;
@@ -598,8 +675,8 @@ memoryForm.addEventListener('submit',async event=>{
   }catch(error){memoryError.textContent=error.message||'This moment could not be saved. Please keep your original photo.'}finally{submit.disabled=false}
 });
 renderMemories();
-addEventListener('pagehide',()=>{stopChamber();cancelAnimationFrame(chamberFrame);chamberFrame=0;photoUrls.forEach(URL.revokeObjectURL)});
-addEventListener('pageshow',event=>{if(event.persisted)renderMemories()});
+addEventListener('pagehide',()=>{stopChamber();cancelAnimationFrame(chamberFrame);chamberFrame=0;visionImageToken++;visionImageUrls.forEach(URL.revokeObjectURL);visionImageUrls.clear();photoUrls.forEach(URL.revokeObjectURL)});
+addEventListener('pageshow',event=>{if(event.persisted){renderMemories();renderVisions();startChamberFrame()}});
 
 if('serviceWorker' in navigator){
   addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));

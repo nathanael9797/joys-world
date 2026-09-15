@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="preload" as="image" href="assets/joy-estate.jpg">
-  <link rel="stylesheet" href="styles.css?v=30">
+  <link rel="stylesheet" href="styles.css?v=31">
   <title>Joy's World</title>
 </head>
 <body>
@@ -112,6 +112,8 @@
           <div class="chamber-space">
             <img class="chamber-art" src="assets/joy-chamber.webp" alt="A monumental aged-brass manifestation mirror in an ivory palazzo, above a black reflective water basin" loading="lazy">
             <div class="chamber-dream" data-dream="light" aria-hidden="true"></div>
+            <div class="chamber-vision" aria-hidden="true"><img alt=""></div>
+            <div class="chamber-vision-reflection" aria-hidden="true"><img alt=""></div>
             <div class="chamber-ring" aria-hidden="true"></div>
             <div class="chamber-water" aria-hidden="true"><i></i><i></i><i></i></div>
             <div class="chamber-veil" aria-hidden="true"></div>
@@ -122,6 +124,12 @@
           <form id="vision-form" class="vision-input" hidden>
             <label for="vision-intention">WHAT ARE YOU CALLING INTO YOUR LIFE?</label>
             <input id="vision-intention" maxlength="140" required autocomplete="off" placeholder="A future that feels like me…">
+            <div class="vision-image-tools">
+              <label class="vision-scene-label" for="vision-scene">DREAM SCENE<select id="vision-scene"><option value="auto">Match my words</option><option value="home">A beautiful home</option><option value="travel">The coast</option><option value="car">An elegant car</option></select></label>
+              <label class="vision-photo-label">＋ MY OWN IMAGE<input id="vision-photo" type="file" accept="image/jpeg,image/png,image/webp"><span>JPG / PNG / WEBP · MAX 8 MB</span></label>
+              <button id="vision-photo-clear" type="button" hidden>REMOVE IMAGE</button>
+            </div>
+            <p id="vision-photo-status" role="status" aria-live="polite"></p>
             <div><button type="submit">PLANT THIS VISION</button><button type="button" id="vision-cancel">RETURN</button></div>
           </form>
           <p id="chamber-status" class="chamber-status" role="status" aria-live="polite"></p>
@@ -244,6 +252,6 @@
 
   <div class="toast" id="toast" role="status"></div>
   <audio id="house-jazz" src="assets/joy-house-jazz.mp3" preload="metadata" loop></audio>
-  <script src="app.js?v=30"></script>
+  <script src="app.js?v=31"></script>
 </body>
 </html>
