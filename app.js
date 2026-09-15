@@ -138,18 +138,38 @@ function summonAttendant(action){
     attendantBusy=false;
   },3500);
 }
+// One canonical palette, consumed by both garments and product swatches.
+const wardrobePalette=Object.freeze([
+  {id:'white',name:'Pure White',hex:'#ffffff'},
+  {id:'ivory',name:'Ivory / Cream',hex:'#e1d3bf'},
+  {id:'black',name:'Black',hex:'#171416'},
+  {id:'espresso',name:'Espresso',hex:'#2b1b1a'},
+  {id:'chocolate',name:'Chocolate',hex:'#4a3029'},
+  {id:'taupe',name:'Taupe',hex:'#918176'},
+  {id:'camel',name:'Camel',hex:'#b38b60'},
+  {id:'stone',name:'Stone / Beige',hex:'#c7b9a6'},
+  {id:'charcoal',name:'Charcoal',hex:'#242022'},
+  {id:'rose',name:'Rose',hex:'#713247'},
+  {id:'blush',name:'Blush',hex:'#c99b9c'},
+  {id:'burgundy',name:'Burgundy / Wine',hex:'#582338'},
+  {id:'rust',name:'Rust',hex:'#a55031'},
+  {id:'navy',name:'Navy',hex:'#263044'},
+  {id:'olive',name:'Olive',hex:'#626449'}
+]);
+const paletteById=Object.freeze(Object.fromEntries(wardrobePalette.map(c=>[c.id,c])));
+const garmentColors={top:'espresso',bottom:'charcoal'};
 const wardrobe={
   top:[
-    {id:'silk',name:'Espresso silk',note:'Draped neckline',tone:'#2b1b1a'},
-    {id:'rust',name:'Rust wrap',note:'Soft sculpted waist',tone:'#a55031'},
-    {id:'ivory',name:'Ivory blouse',note:'Architectural sleeve',tone:'#e1d3bf'},
-    {id:'black',name:'Midnight bodice',note:'Gathered & fitted',tone:'#171416'}
+    {id:'silk',name:'Silk top',note:'Draped neckline',material:'silk',defaultColor:'espresso'},
+    {id:'rust',name:'Wrap top',note:'Soft sculpted waist',material:'silk',defaultColor:'rust'},
+    {id:'ivory',name:'Blouse',note:'Architectural sleeve',material:'crepe',defaultColor:'ivory'},
+    {id:'black',name:'Bodice',note:'Gathered & fitted',material:'satin',defaultColor:'black'}
   ],
   bottom:[
-    {id:'trousers',name:'Tailored trouser',note:'Long clean line',tone:'#242022'},
-    {id:'midi',name:'Rose midi',note:'Fluid movement',tone:'#713247'},
-    {id:'wrap',name:'Rust wrap skirt',note:'Warm & effortless',tone:'#9f4d31'},
-    {id:'column',name:'Black column',note:'Evening silhouette',tone:'#151315'}
+    {id:'trousers',name:'Tailored trouser',note:'Long clean line',material:'wool',defaultColor:'charcoal'},
+    {id:'midi',name:'Midi skirt',note:'Fluid movement',material:'silk',defaultColor:'rose'},
+    {id:'wrap',name:'Wrap skirt',note:'Warm & effortless',material:'crepe',defaultColor:'rust'},
+    {id:'column',name:'Column skirt',note:'Evening silhouette',material:'satin',defaultColor:'black'}
   ],
   shoes:[
     {id:'heels',name:'Sculpted heel',note:'Metallic accent',tone:'#aa823e'},
@@ -175,6 +195,13 @@ const occasionLooks={
   'Celebration':{title:'Rust & Radiance',top:'rust',bottom:'wrap',shoes:'heels',bag:'clutch',jewelry:'drops'},
   'Power meeting':{title:'Quiet Authority',top:'ivory',bottom:'trousers',shoes:'loafer',bag:'mini',jewelry:'minimal'}
 };
+const occasionColors={
+  'Date night':{top:'black',bottom:'black'},
+  'Sunday elegance':{top:'ivory',bottom:'rose'},
+  'City day':{top:'espresso',bottom:'charcoal'},
+  'Celebration':{top:'rust',bottom:'rust'},
+  'Power meeting':{top:'ivory',bottom:'charcoal'}
+};
 let occasionTitle=occasionLooks['Date night'].title;
 const categoryLabels={top:'Top',bottom:'Bottom',shoes:'Shoes',bag:'Bag',jewelry:'Jewels'};
 const model=document.getElementById('joy-model');
@@ -184,6 +211,27 @@ const composerSummary=document.getElementById('composer-summary');
 let activeCategory='top';
 
 function piece(category,id){return wardrobe[category].find(item=>item.id===id)}
+function mixColor(hex,target,amount){
+  const a=hex.slice(1).match(/../g).map(v=>parseInt(v,16));
+  const b=target.slice(1).match(/../g).map(v=>parseInt(v,16));
+  return '#'+a.map((v,i)=>Math.round(v+(b[i]-v)*amount).toString(16).padStart(2,'0')).join('');
+}
+function materialColors(tone,material='wool'){
+  const response={silk:{light:.16,dark:.14},satin:{light:.21,dark:.18},crepe:{light:.07,dark:.11},wool:{light:.035,dark:.085}}[material];
+  return {highlight:mixColor(tone,'#f6eee3',response.light),shadow:mixColor(tone,'#130f12',response.dark)};
+}
+function renderColors(){
+  const panel=document.getElementById('garment-colors');
+  panel.hidden=!(activeCategory in garmentColors);
+  if(panel.hidden){panel.innerHTML='';return;}
+  const selected=paletteById[garmentColors[activeCategory]];
+  panel.innerHTML=`<div class="fabric-color-heading"><span>COLOR</span><small>${selected.name}</small></div><div class="fabric-swatches" role="group" aria-label="${categoryLabels[activeCategory]} color">${wardrobePalette.map(c=>`<button type="button" class="fabric-swatch" data-color="${c.id}" aria-label="${c.name}" aria-pressed="${c.id===selected.id}" title="${c.name}" style="--fabric-color:${c.hex}"><span aria-hidden="true"></span></button>`).join('')}</div>`;
+  panel.querySelectorAll('[data-color]').forEach(button=>button.addEventListener('click',()=>{
+    garmentColors[activeCategory]=button.dataset.color;
+    occasionTitle='Joy’s Personal Mix';
+    fitGarment(activeCategory);renderOptions();updateComposer();
+  }));
+}
 // JOY_BASE_LOCKED: all coordinates are measured against the immutable 420×938 base.
 // These are dedicated worn assets, never product thumbnails or mannequin shapes.
 const fittedStage=model.querySelector('.joy-fitted-layers');
@@ -202,8 +250,9 @@ const fittedPaths={
   }
 };
 function wornAsset(category,id){
-  const item=piece(category,id), tone=item.tone;
-  const defs=`<defs><linearGradient id="cloth-${category}" x1="0" x2="1"><stop stop-color="${tone}"/><stop offset=".38" stop-color="${tone}"/><stop offset=".57" stop-color="${tone}" stop-opacity=".83"/><stop offset="1" stop-color="${tone}"/></linearGradient><mask id="hands-${category}"><rect width="420" height="938" fill="white"/><path d="M99 350 Q116 337 137 347 L158 371 L151 391 L115 383 L96 370Z M286 464 Q303 464 315 493 L317 526 L301 548 L286 537 L280 506Z" fill="black"/></mask></defs>`;
+  const item=piece(category,id), tone=garmentColors[category]?paletteById[garmentColors[category]].hex:item.tone;
+  const material=materialColors(tone,item.material);
+  const defs=`<defs><linearGradient id="cloth-${category}" x1="0" x2="1"><stop stop-color="${material.shadow}"/><stop offset=".38" stop-color="${tone}"/><stop offset=".57" stop-color="${material.highlight}"/><stop offset="1" stop-color="${material.shadow}"/></linearGradient><mask id="hands-${category}"><rect width="420" height="938" fill="white"/><path d="M99 350 Q116 337 137 347 L158 371 L151 391 L115 383 L96 370Z M286 464 Q303 464 315 493 L317 526 L301 548 L286 537 L280 506Z" fill="black"/></mask></defs>`;
   let drawing='';
   if(category==='top'){
     drawing=`<g mask="url(#hands-top)"><path d="${fittedPaths.top[id]}" fill="url(#cloth-top)"/><g fill="none" stroke="${id==='ivory'?'#9f8972':'#b2937b'}" stroke-opacity=".25" stroke-width="1.5"><path d="M139 275 Q155 299 144 343 M250 273 Q237 300 249 345 M132 359 Q190 375 251 361"/>${id==='rust'?'<path d="M153 190 Q213 239 251 281 L135 338 M135 339 Q187 349 251 335"/>':'<path d="M149 220 Q197 248 240 216 M154 229 Q195 253 231 230"/>'}</g>${id==='ivory'?'<path d="M123 177 Q99 170 87 194 Q70 238 36 285 Q26 304 41 325 L89 367 L104 348 L60 302 Q101 256 121 218Z M262 177 Q292 177 298 211 L309 330 L309 467 L287 471 L277 336 L265 235Z" fill="url(#cloth-top)"/><path d="M40 294 Q53 299 65 303 M281 329 L303 334 M87 355 L98 343 M289 458 L307 455" fill="none" stroke="#9f8972" stroke-opacity=".35" stroke-width="2"/>':''}</g>`;
@@ -241,17 +290,18 @@ function fitGarment(category){
   fittedStage.querySelector(`[data-worn="${category}"]`).classList.add('couture-fit');
 }
 function renderOptions(){
-  options.innerHTML=wardrobe[activeCategory].map(item=>`<button class="piece ${selections[activeCategory]===item.id?'active':''}" data-piece="${item.id}"><i class="piece-thumb ${activeCategory}-${item.id}" style="--swatch:${item.tone}"></i><span><b>${item.name}</b><small>${item.note}</small></span><em>${selections[activeCategory]===item.id?'SELECTED':'ADD'}</em></button>`).join('');
+  options.innerHTML=wardrobe[activeCategory].map(item=>`<button class="piece ${selections[activeCategory]===item.id?'active':''}" data-piece="${item.id}"><i class="piece-thumb ${activeCategory}-${item.id}" style="--swatch:${activeCategory in garmentColors?paletteById[garmentColors[activeCategory]].hex:item.tone}"></i><span><b>${item.name}</b><small>${item.note}</small></span><em>${selections[activeCategory]===item.id?'SELECTED':'ADD'}</em></button>`).join('');
   options.querySelectorAll('.piece').forEach(button=>button.addEventListener('click',()=>{
     occasionTitle='Joy’s Personal Mix';
     selections[activeCategory]=button.dataset.piece;
     model.dataset[activeCategory]=button.dataset.piece;
     fitGarment(activeCategory); renderOptions(); updateComposer();
   }));
+  renderColors();
 }
 function updateComposer(){
   const top=piece('top',selections.top), bottom=piece('bottom',selections.bottom), shoes=piece('shoes',selections.shoes);
-  const names=[top.name,bottom.name,piece('bag',selections.bag).name,piece('jewelry',selections.jewelry).name];
+  const names=[paletteById[garmentColors.top].name+' '+top.name,paletteById[garmentColors.bottom].name+' '+bottom.name,piece('bag',selections.bag).name,piece('jewelry',selections.jewelry).name];
   composerTitle.textContent=occasionTitle;
   composerSummary.textContent=names.join(' · ');
 }
@@ -259,6 +309,7 @@ const occasionSelect=document.getElementById('occasion');
 function applyOccasion(name,announce=true){
   const edit=occasionLooks[name];
   occasionTitle=edit.title;
+  Object.assign(garmentColors,occasionColors[name]);
   Object.keys(selections).forEach(category=>{
     selections[category]=edit[category];
     model.dataset[category]=edit[category];
@@ -276,6 +327,7 @@ document.querySelectorAll('.category').forEach(button=>button.addEventListener('
 }));
 document.getElementById('random-look').addEventListener('click',()=>{
   occasionTitle='Joy’s Personal Mix';
+  Object.keys(garmentColors).forEach(category=>{garmentColors[category]=wardrobePalette[Math.floor(Math.random()*wardrobePalette.length)].id});
   Object.keys(wardrobe).forEach(category=>{
     const items=wardrobe[category]; selections[category]=items[Math.floor(Math.random()*items.length)].id;
     model.dataset[category]=selections[category];
@@ -294,7 +346,7 @@ function renderSaved(){
 }
 document.getElementById('save-outfit').addEventListener('click',()=>{
   const saved=JSON.parse(localStorage.getItem('joySavedLooks')||'[]');
-  saved.unshift({title:composerTitle.textContent,occasion:document.getElementById('occasion').value,pieces:{...selections}});
+  saved.unshift({version:2,title:composerTitle.textContent,occasion:document.getElementById('occasion').value,pieces:{...selections},colors:{...garmentColors}});
   localStorage.setItem('joySavedLooks',JSON.stringify(saved.slice(0,6)));
   renderSaved();summonAttendant('service');notify('Complete look saved to Joy’s edit.');
 });
