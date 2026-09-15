@@ -8,7 +8,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="preload" as="image" href="assets/joy-estate.jpg">
-  <link rel="stylesheet" href="styles.css?v=31">
+  <link rel="stylesheet" href="styles.css?v=32">
   <title>Joy's World</title>
 </head>
 <body>
@@ -110,10 +110,11 @@
       <div class="retreat-shell">
         <div class="chamber-scene" data-state="idle">
           <div class="chamber-space">
-            <img class="chamber-art" src="assets/joy-chamber.webp" alt="A monumental aged-brass manifestation mirror in an ivory palazzo, above a black reflective water basin" loading="lazy">
+            <img class="chamber-art" src="assets/joy-chamber-v2.webp" alt="An intimate oxblood and ivory palazzo chamber with a monumental brass mirror above an obsidian water basin" loading="lazy">
             <div class="chamber-dream" data-dream="light" aria-hidden="true"></div>
             <div class="chamber-vision" aria-hidden="true"><img alt=""></div>
             <div class="chamber-vision-reflection" aria-hidden="true"><img alt=""></div>
+            <div class="chamber-glass-shade" aria-hidden="true"></div>
             <div class="chamber-ring" aria-hidden="true"></div>
             <div class="chamber-water" aria-hidden="true"><i></i><i></i><i></i></div>
             <div class="chamber-veil" aria-hidden="true"></div>
@@ -123,21 +124,26 @@
           <div id="vision-sentence" class="vision-sentence" aria-hidden="true"></div>
           <form id="vision-form" class="vision-input" hidden>
             <label for="vision-intention">WHAT ARE YOU CALLING INTO YOUR LIFE?</label>
-            <input id="vision-intention" maxlength="140" required autocomplete="off" placeholder="A future that feels like me…">
+            <textarea id="vision-intention" maxlength="140" rows="2" required autocomplete="off" placeholder="A future that feels like me…"></textarea>
             <div class="vision-image-tools">
-              <label class="vision-scene-label" for="vision-scene">DREAM SCENE<select id="vision-scene"><option value="auto">Match my words</option><option value="home">A beautiful home</option><option value="travel">The coast</option><option value="car">An elegant car</option></select></label>
-              <label class="vision-photo-label">＋ MY OWN IMAGE<input id="vision-photo" type="file" accept="image/jpeg,image/png,image/webp"><span>JPG / PNG / WEBP · MAX 8 MB</span></label>
-              <button id="vision-photo-clear" type="button" hidden>REMOVE IMAGE</button>
+              <input id="vision-scene" type="hidden" value="auto">
+              <div class="vision-scene-options" role="group" aria-label="Choose a dream image">
+                <button type="button" data-vision-scene="auto" aria-pressed="true"><span class="vision-auto-mark">✧</span><small>Intuition</small></button>
+                <button type="button" data-vision-scene="home" aria-pressed="false"><img src="assets/vision-home.webp" alt=""><small>Home</small></button>
+                <button type="button" data-vision-scene="travel" aria-pressed="false"><img src="assets/vision-travel.webp" alt=""><small>Escape</small></button>
+                <button type="button" data-vision-scene="car" aria-pressed="false"><img src="assets/vision-car.webp" alt=""><small>Drive</small></button>
+              </div>
+              <label class="vision-photo-label">＋ Your own image<input id="vision-photo" type="file" accept="image/jpeg,image/png,image/webp"></label>
+              <button id="vision-photo-clear" type="button" hidden>Remove image</button>
             </div>
             <p id="vision-photo-status" role="status" aria-live="polite"></p>
-            <div><button type="submit">PLANT THIS VISION</button><button type="button" id="vision-cancel">RETURN</button></div>
+            <div class="vision-confirm-actions"><button type="submit">PLANT THIS VISION</button><button type="button" id="vision-cancel">RETURN</button></div>
           </form>
           <p id="chamber-status" class="chamber-status" role="status" aria-live="polite"></p>
           <div class="chamber-actions"><button id="vision-create">CREATE A VISION</button><button id="vision-library" aria-expanded="false" aria-controls="vision-collection">MY VISIONS</button></div>
+          <div id="vision-collection" class="vision-collection" hidden></div>
         </div>
-        <div id="vision-collection" class="vision-collection" hidden></div>
-        <p class="chamber-local">Your visions stay in this browser, on this device. Clearing browser data removes them. A private space for intention and imagination.</p>
-        <button class="text-action" data-room="salon">BACK TO THE SALON →</button>
+        <footer class="chamber-footer"><button class="text-action" data-room="salon">← THE SALON</button><details><summary>PRIVATE BY DESIGN</summary><p class="chamber-local">Visions and images stay in this browser on this device. They are not uploaded or synced. Clearing browser data removes them; keep original images separately.</p></details></footer>
       </div>
     </section>
 
@@ -252,6 +258,6 @@
 
   <div class="toast" id="toast" role="status"></div>
   <audio id="house-jazz" src="assets/joy-house-jazz.mp3" preload="metadata" loop></audio>
-  <script src="app.js?v=31"></script>
+  <script src="app.js?v=32"></script>
 </body>
 </html>

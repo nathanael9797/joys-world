@@ -451,6 +451,15 @@ const visionReflection=chamber.querySelector('.chamber-vision-reflection');
 const visionSceneAssets={home:'assets/vision-home.webp',travel:'assets/vision-travel.webp',car:'assets/vision-car.webp'};
 let visionImageDbPromise,visionImageToken=0,photoReadToken=0,preparedVisionPhoto=null,preparingPhoto=false,activeVisionId=null;
 const visionImageUrls=new Map();
+function selectVisionScene(value){
+  visionScene.value=value;
+  document.querySelectorAll('[data-vision-scene]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.visionScene===value)));
+}
+document.querySelectorAll('[data-vision-scene]').forEach(button=>button.addEventListener('click',()=>selectVisionScene(button.dataset.visionScene)));
+function toggleVisionLibrary(open){
+  visionCollection.hidden=!open;chamber.classList.toggle('visions-open',open);visionLibrary.setAttribute('aria-expanded',String(open));
+  if(open)visionCollection.querySelector('button')?.focus();
+}
 function visionImageDb(){
   if(!visionImageDbPromise)visionImageDbPromise=new Promise((resolve,reject)=>{
     const request=indexedDB.open('joy-chamber-images',1);
@@ -523,6 +532,9 @@ function dreamFor(text){
 function rememberVisions(next){localStorage.setItem(VISION_KEY,JSON.stringify(next));visions=next;renderVisions()}
 function renderVisions(){
   visionCollection.replaceChildren();
+  const heading=document.createElement('div');heading.className='vision-library-heading';
+  const label=document.createElement('h3');label.textContent='Your visions';
+  const close=document.createElement('button');close.type='button';close.textContent='×';close.setAttribute('aria-label','Close my visions');close.addEventListener('click',()=>{toggleVisionLibrary(false);visionLibrary.focus()});heading.append(label,close);visionCollection.append(heading);
   if(!visions.length){const p=document.createElement('p');p.textContent='The mirror is waiting for your first vision.';visionCollection.append(p)}
   visions.forEach(vision=>{
     const row=document.createElement('article');row.className='vision-entry';
@@ -530,7 +542,7 @@ function renderVisions(){
     const title=document.createElement('span');title.textContent=vision.text;recall.append(title);
     const sceneSource=visionSceneAssets[vision.visual]||visionSceneAssets[sceneFor(vision.text)];
     if(sceneSource||vision.image){const thumb=document.createElement('img');thumb.alt='';thumb.loading='lazy';recall.prepend(thumb);if(sceneSource&&!vision.image)thumb.src=sceneSource;else visionImageOperation('readonly',vision.id).then(blob=>{if(!blob)return;if(!visionImageUrls.has(vision.id))visionImageUrls.set(vision.id,URL.createObjectURL(blob));thumb.src=visionImageUrls.get(vision.id)}).catch(()=>thumb.remove())}
-    recall.addEventListener('click',()=>{showVision(vision);chamberStatus.textContent=vision.lived?'LIVED · '+vision.text:vision.text});
+    recall.addEventListener('click',()=>{showVision(vision);toggleVisionLibrary(false);chamberStatus.textContent=vision.lived?'LIVED · '+vision.text:vision.text});
     const lived=document.createElement('button');lived.className='vision-lived';lived.textContent=vision.lived?'LIVED':'MARK LIVED';lived.disabled=!!vision.lived;
     lived.addEventListener('click',()=>{try{rememberVisions(visions.map(v=>v.id===vision.id?{...v,lived:true}:v));chamberStatus.textContent='LIVED · A light that stays.';drawChamber(performance.now())}catch(error){chamberStatus.textContent='Could not save this change. Your vision is still here.'}});
     row.append(recall,lived);visionCollection.append(row);
@@ -545,20 +557,21 @@ function restoreChamberAudio(){
   chamberAudio=false;
 }
 function stopChamber(){
-  chamberToken++;ritualStart=0;chamber.dataset.state='idle';visionForm.hidden=true;visionSentence.replaceChildren();
+  chamberToken++;ritualStart=0;chamber.dataset.state='idle';visionForm.hidden=true;visionSentence.replaceChildren();toggleVisionLibrary(false);
   visionCreate.disabled=false;visionLibrary.disabled=false;restoreChamberAudio();
 }
 async function openVision(){
   if(chamber.dataset.state!=='idle')return;
   const token=++chamberToken;chamber.dataset.state='approaching';chamberStatus.textContent='';
-  visionCollection.hidden=true;visionLibrary.setAttribute('aria-expanded','false');visionCreate.disabled=true;visionLibrary.disabled=true;
+  toggleVisionLibrary(false);visionCreate.disabled=true;visionLibrary.disabled=true;
   chamberAudio=!houseJazz.paused&&!ambienceMuted;if(chamberAudio)fadeAmbience(0,1000);
   await wait(reduceMotion?100:1450);if(token!==chamberToken)return;
   chamber.dataset.state='writing';visionForm.hidden=false;visionInput.focus();
 }
 visionCreate.addEventListener('click',openVision);
 document.getElementById('vision-cancel').addEventListener('click',()=>{stopChamber();visionCreate.focus()});
-visionLibrary.addEventListener('click',()=>{visionCollection.hidden=!visionCollection.hidden;visionLibrary.setAttribute('aria-expanded',String(!visionCollection.hidden));if(!visionCollection.hidden)visionCollection.scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'nearest'})});
+visionLibrary.addEventListener('click',()=>toggleVisionLibrary(visionCollection.hidden));
+chamber.addEventListener('keydown',event=>{if(event.key==='Escape'){if(!visionCollection.hidden){toggleVisionLibrary(false);visionLibrary.focus()}else if(chamber.dataset.state==='writing'){stopChamber();visionCreate.focus()}}});
 visionForm.addEventListener('submit',async event=>{
   event.preventDefault();if(chamber.dataset.state!=='writing'||preparingPhoto)return;
   const text=visionInput.value.trim();if(!text){visionInput.focus();return}
@@ -575,7 +588,7 @@ visionForm.addEventListener('submit',async event=>{
     if(photo)await visionImageOperation('readwrite',vision.id,photo);
     if(token!==chamberToken)return;
     activeVisionId=vision.id;rememberVisions([...visions,vision]);
-    chamber.dataset.state='planted';chamberStatus.textContent='VISION PLANTED';visionInput.value='';visionScene.value='auto';clearVisionPhoto();
+    chamber.dataset.state='planted';chamberStatus.textContent='VISION PLANTED';visionInput.value='';selectVisionScene('auto');clearVisionPhoto();
   }catch(error){chamber.dataset.state='planted';chamberStatus.textContent='Your vision could not be saved on this device. Please copy it: '+text}
   ritualStart=0;visionSentence.replaceChildren();restoreChamberAudio();
   await wait(reduceMotion?200:1800);if(token!==chamberToken)return;
@@ -596,7 +609,7 @@ function drawChamber(now){
     const seed=visionSeed(v.id),angle=(seed%628)/100,r=.025+(seed%140)/1000;
     const x=.5+Math.cos(angle)*r,y=.32+Math.sin(angle)*r*.75;
     point(x,y,v.lived?.0025:.0015,v.lived?.95:.45);
-    point(x,.68+(y-.32)*.18,.0014,v.lived?.6:.23);
+    point(x,.73+(y-.32)*.18,.0014,v.lived?.6:.23);
     if(i>=3)point(i%2?.92:.075,.28+(i%7)*.038,.0011,v.lived?.7:.3);
   });
   if(visions.length>=3){
@@ -605,17 +618,17 @@ function drawChamber(now){
   }
   const active=chamber.dataset.state!=='idle';
   // All ripples clipped exclusively inside the black basin surface.
-  c.save();c.beginPath();c.ellipse(w*.5,h*.69,w*.47,h*.086,0,0,Math.PI*2);c.clip();
+  c.save();c.beginPath();c.ellipse(w*.5,h*.73,w*.47,h*.075,0,0,Math.PI*2);c.clip();
   for(let i=0;i<3;i++){
     const p=(t/(active?5:24)+i/3)%1;c.strokeStyle=`rgba(216,187,133,${(1-p)*(active?.16:.035)})`;c.lineWidth=w*.001;
-    c.beginPath();c.ellipse(w*.5,h*.687,w*(.015+p*.40),h*(.004+p*.064),0,0,Math.PI*2);c.stroke();
+    c.beginPath();c.ellipse(w*.5,h*.728,w*(.015+p*.40),h*(.004+p*.064),0,0,Math.PI*2);c.stroke();
   }
   c.restore();
   if(ritualStart&&!reduceMotion){
     const p=Math.min(1,(now-ritualStart)/3600);
     for(let i=0;i<70;i++){
       const a=i*2.399+p*5.2,r=(1-p)*(.14+(i%7)*.013);
-      point(.5+Math.cos(a)*r,.60+Math.sin(a)*r*.23+p*.086,.0008+(i%3)*.00025,Math.sin(p*Math.PI)*.7);
+      point(.5+Math.cos(a)*r,.60+Math.sin(a)*r*.23+p*.13,.0008+(i%3)*.00025,Math.sin(p*Math.PI)*.7);
     }
   }
 }
