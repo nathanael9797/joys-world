@@ -63,7 +63,9 @@
 .atelier-preview{min-height:610px}
 .joy-model{position:relative;width:190px;height:438px;margin:10px auto 0;transform:none;filter:drop-shadow(0 21px 25px rgba(0,0,0,.28))}
 .joy-body{position:absolute;z-index:1;inset:0;width:190px;height:425px;object-fit:fill;pointer-events:none}
-.joy-head-lock{position:absolute;z-index:3;left:36px;top:-18px;width:118px;height:126px;overflow:hidden;pointer-events:none;mask-image:radial-gradient(ellipse 48% 49% at 50% 43%,#000 58%,rgba(0,0,0,.94) 72%,transparent 100%),linear-gradient(to bottom,#000 90px,rgba(0,0,0,.97) 92px,rgba(0,0,0,.84) 95px,rgba(0,0,0,.58) 98px,rgba(0,0,0,.29) 101px,rgba(0,0,0,.08) 104px,transparent 108px);mask-composite:intersect}
+/* Only the lower-neck overlap fades into the approved base clavicles.
+   Portrait pixels above 90px and all figure/garment coordinates stay locked. */
+.joy-head-lock{position:absolute;z-index:3;left:36px;top:-18px;width:118px;height:126px;overflow:hidden;pointer-events:none;mask-image:radial-gradient(ellipse 48% 49% at 50% 43%,#000 58%,rgba(0,0,0,.94) 72%,transparent 100%),linear-gradient(to bottom,#000 90px,rgba(0,0,0,.90) 92px,rgba(0,0,0,.65) 94px,rgba(0,0,0,.25) 97px,rgba(0,0,0,.04) 100px,transparent 102px);mask-composite:intersect}
 .joy-portrait{position:absolute;left:-7px;top:-12px;width:132px;height:158px;object-fit:cover;object-position:center 20%;border:0;border-radius:0;clip-path:none;filter:none;pointer-events:none}
 @media(min-width:760px){.atelier-preview{min-height:675px}.joy-model{transform:scale(1.12);transform-origin:top center}}
 
