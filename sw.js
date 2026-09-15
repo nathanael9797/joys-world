@@ -1,5 +1,5 @@
-const CACHE='joys-world-v25';
-const ASSETS=['./styles.css?v=25','./app.js?v=24','./manifest.webmanifest','./icon.svg','./assets/joy-estate.jpg','./assets/joy-portrait.webp','./assets/joy-body.webp','./assets/door-latch.wav?v=20','./assets/joy-house-jazz.mp3'];
+const CACHE='joys-world-v26';
+const ASSETS=['./styles.css?v=26','./app.js?v=26','./manifest.webmanifest','./icon.svg','./assets/joy-estate.jpg','./assets/joy-portrait.webp','./assets/joy-body.webp','./assets/door-latch.wav?v=20','./assets/joy-house-jazz.mp3'];
 
 self.addEventListener('install',event=>{
   self.skipWaiting();
